@@ -8,16 +8,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.LaunchItem
 import com.example.listanddetails.ui.theme.ListAndDetailsTheme
+import com.example.listanddetails.ui.theme.OnSuccessGreen
+import com.example.listanddetails.ui.theme.SuccessGreen
 
 @Composable
 fun LaunchCard(
@@ -29,14 +36,16 @@ fun LaunchCard(
         modifier = modifier,
         onClick = onClick
     ) {
-        AsyncImage(
-            model = launch.imageUrl,
-            contentDescription = launch.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-        )
+        if (!launch.imageUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = launch.imageUrl,
+                contentDescription = launch.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            )
+        }
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -45,25 +54,54 @@ fun LaunchCard(
             Text(
                 text = launch.name,
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = launch.agency,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = launch.date,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = launch.status,
-                    style = MaterialTheme.typography.bodyMedium
+                
+                val isSuccess = launch.status.contains("Success", ignoreCase = true)
+                val isFailure = launch.status.contains("Fail", ignoreCase = true)
+                val containerColor = when {
+                    isSuccess -> SuccessGreen.copy(alpha = 0.15f)
+                    isFailure -> MaterialTheme.colorScheme.errorContainer
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                }
+                val labelColor = when {
+                    isSuccess -> OnSuccessGreen
+                    isFailure -> MaterialTheme.colorScheme.onErrorContainer
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+
+                SuggestionChip(
+                    onClick = onClick,
+                    label = {
+                        Text(
+                            text = launch.status,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = labelColor
+                        )
+                    },
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        containerColor = containerColor
+                    ),
+                    border = null
                 )
             }
         }
@@ -83,7 +121,6 @@ private fun LaunchCardPreview() {
 }
 
 val mockLaunches = listOf(
-    // Запуск из твоего JSON (Falcon 1 | DemoSat)
     LaunchItem(
         id = "9a50023f-07fe-45ac-9ac6-7fb6b5ea970d",
         name = "Falcon 1 | DemoSat",
@@ -92,7 +129,6 @@ val mockLaunches = listOf(
         agency = "SpaceX",
         imageUrl = "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_image_20190222030438.jpeg"
     ),
-    // Успешный пуск с длинным названием
     LaunchItem(
         id = "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         name = "Falcon 9 Block 5 | Starlink Group 6-58 (Direct to Cell)",
@@ -101,7 +137,6 @@ val mockLaunches = listOf(
         agency = "SpaceX",
         imageUrl = "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg"
     ),
-    // Пуск без картинки (проверка отображения при imageUrl = null)
     LaunchItem(
         id = "b2c3d4e5-f6a7-8901-bcde-f12345678901",
         name = "Electron | There and Back Again",

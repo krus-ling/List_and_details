@@ -20,6 +20,7 @@ nav3Core = "1.2.0"
 lifecycleViewmodelNav3 = "2.12.0-alpha04"
 kotlinxSerializationCore = "1.11.0"
 material3AdaptiveNav3 = "1.4.0-alpha02"
+translate = "17.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +54,7 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
+translate = { module = "com.google.mlkit:translate", version.ref = "translate" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -9,14 +9,28 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-fun LaunchListItemDto.toDomain(): LaunchItem = LaunchItem(
-    id = id,
-    name = name,
-    status = status?.name ?: "Неизвестно",
-    date = formatLaunchDate(net),
-    agency = lspName ?: "Не указано",
-    imageUrl = image
-)
+fun LaunchListItemDto.toDomain(): LaunchItem {
+    val videos = when {
+        !vidUrls.isNullOrEmpty() -> vidUrls
+        !vidUrlsSnake.isNullOrEmpty() -> vidUrlsSnake
+        !mission?.vidUrls.isNullOrEmpty() -> mission.vidUrls
+        !mission?.vidUrlsSnake.isNullOrEmpty() -> mission.vidUrlsSnake
+        else -> null
+    }
+    val hasValidVideo = webcastLive == true || videos?.any { !it.url.isNullOrBlank() } == true
+
+    return LaunchItem(
+        id = id,
+        name = name,
+        status = status?.name ?: "Неизвестно",
+        date = formatLaunchDate(net),
+        agency = provider?.name ?: lspName ?: "Не указано",
+        imageUrl = image,
+        padName = pad?.name,
+        hasVideo = hasValidVideo,
+        rawDate = net
+    )
+}
 
 fun LaunchDetailDto.toDomain(): LaunchDetail = LaunchDetail(
     id = id,
@@ -38,13 +52,16 @@ fun LaunchDetailDto.toDomain(): LaunchDetail = LaunchDetail(
     rawDate = net
 )
 
+private val russianDateFormatter: DateTimeFormatter by lazy {
+    DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale.forLanguageTag("ru"))
+        .withZone(ZoneId.systemDefault())
+}
+
 private fun formatLaunchDate(isoDate: String?): String {
     if (isoDate.isNullOrBlank()) return "Не указана"
     return try {
         val instant = Instant.parse(isoDate)
-        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("ru"))
-            .withZone(ZoneId.systemDefault())
-        formatter.format(instant)
+        russianDateFormatter.format(instant)
     } catch (e: Exception) {
         isoDate
     }

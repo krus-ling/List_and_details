@@ -23,7 +23,9 @@ data class MissionDto(
     val name: String?,
     val description: String?,
     val type: String?,
-    val orbit: OrbitDto?
+    val orbit: OrbitDto?,
+    @SerialName("vid_urls") val vidUrlsSnake: List<VidUrlDto>? = null,
+    @SerialName("vidURLs") val vidUrls: List<VidUrlDto>? = null
 )
 
 @Serializable

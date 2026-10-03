@@ -2,9 +2,11 @@ package com.example.listanddetails.di
 
 import com.example.listanddetails.data.network.LaunchApiService
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -23,13 +25,19 @@ val networkModule = module {
 
     // OkHttpClient
     single {
+        val context = androidContext()
+        val cacheSize = 10L * 1024 * 1024 // 10 МБ
+        val cache = Cache(context.cacheDir, cacheSize)
+
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         OkHttpClient.Builder()
+            .cache(cache)
             .addInterceptor(logging)
             .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build()
     }
 
@@ -40,6 +48,8 @@ val networkModule = module {
         val contentType = "application/json".toMediaType()
 
         Retrofit.Builder()
+//            .baseUrl("https://lldev.thespacedevs.com/")
+            // можно выбрать `lldev` для разработки, не будет ограничений, но данных меньше
             .baseUrl("https://ll.thespacedevs.com/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))

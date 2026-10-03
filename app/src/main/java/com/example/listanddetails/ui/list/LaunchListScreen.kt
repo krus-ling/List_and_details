@@ -1,32 +1,45 @@
 package com.example.listanddetails.ui.list
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.listanddetails.domain.model.LaunchItem
+import com.example.listanddetails.R
+import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
+import com.example.listanddetails.ui.list.components.FilterBottomSheet
 import com.example.listanddetails.ui.list.components.LaunchCard
+import com.example.listanddetails.ui.list.components.LaunchListErrorView
+import com.example.listanddetails.ui.list.components.LaunchListSkeleton
+import com.example.listanddetails.ui.list.components.LaunchListTopBar
+import com.example.listanddetails.ui.list.components.mockPreviewLaunches
 import org.koin.androidx.compose.koinViewModel
-
 
 @Composable
 fun LaunchListScreen(
@@ -38,8 +51,12 @@ fun LaunchListScreen(
     LaunchListContent(
         state = state,
         onLaunchClick = onLaunchClick,
-        onRetry = { viewModel.loadLaunches() },
-        onFilterSelect = { filter -> viewModel.loadLaunches(filter) }
+        onRetry = viewModel::loadLaunches,
+        onLoadNextPage = viewModel::loadNextPage,
+        onOpenFilter = viewModel::openFilterSheet,
+        onDismissFilter = viewModel::closeFilterSheet,
+        onFilterChanged = viewModel::onFilterChanged,
+        onResetFilter = viewModel::resetFilters
     )
 }
 
@@ -49,194 +66,260 @@ fun LaunchListContent(
     state: LaunchListUiState,
     onLaunchClick: (String) -> Unit,
     onRetry: () -> Unit,
-    onFilterSelect: (String?) -> Unit
+    onLoadNextPage: () -> Unit = {},
+    onOpenFilter: () -> Unit,
+    onDismissFilter: () -> Unit,
+    onFilterChanged: (LaunchFilter) -> Unit,
+    onResetFilter: () -> Unit
 ) {
+    val listAlpha by animateFloatAsState(
+        targetValue = if (state.isLoading && state.items.isNotEmpty()) 0.5f else 1.0f,
+        label = "listAlpha"
+    )
+
     Scaffold(
-        topBar =  {
-            TopAppBar(
-                title = { Text("Космические запуски") }
+        topBar = {
+            LaunchListTopBar(
+                filter = state.filter,
+                isLoading = state.isLoading,
+                hasItems = state.items.isNotEmpty(),
+                onOpenFilter = onOpenFilter
             )
         }
-
     ) { innerPadding ->
 
         when {
             state.isLoading && state.items.isEmpty() -> {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            state.error != null && state.items.isEmpty() -> {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = state.error)
-                    Button(onClick = onRetry) {
-                        Text("Повторить")
-                    }
-                }
-            }
-
-            else -> {
-
-                val filters = listOf(
-                    null to "Все",
-                    "SpaceX" to "SpaceX",
-                    "NASA" to "NASA",
-                    "Roscosmos" to "Роскосмос",
-                    "Failure" to "Аварийные"
-                )
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(filters) { (filterQuery, title) ->
-                            val isSelected = state.selectedFilter == filterQuery
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = { onFilterSelect(filterQuery) },
-                                label = { Text(title) }
-                            )
-                        }
+                    if (state.filter.isActive) {
+                        ActiveFilterChipsRow(
+                            filter = state.filter,
+                            onFilterChanged = onFilterChanged,
+                            onResetFilter = onResetFilter
+                        )
+                    }
+                    LaunchListSkeleton()
+                }
+            }
+
+            state.error != null && state.items.isEmpty() -> {
+                LaunchListErrorView(
+                    error = state.error,
+                    cooldownSeconds = state.cooldownSeconds,
+                    initialCooldownSeconds = state.initialCooldownSeconds,
+                    onRetry = onRetry,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    if (state.filter.isActive) {
+                        ActiveFilterChipsRow(
+                            filter = state.filter,
+                            onFilterChanged = onFilterChanged,
+                            onResetFilter = onResetFilter
+                        )
                     }
 
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-                        items(
-                            items = state.items,
-                            key = { it.id }
-                        ) { launch ->
-                            LaunchCard(
-                                launch = launch,
-                                onClick = { onLaunchClick(launch.id) }
+                    if (state.items.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_launches_found),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .alpha(listAlpha)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.launches_found, state.totalCount),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            val listState = rememberLazyListState()
+                            val shouldLoadMore = remember {
+                                derivedStateOf {
+                                    val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                                    lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 3
+                                }
+                            }
+
+                            LaunchedEffect(shouldLoadMore.value) {
+                                if (shouldLoadMore.value) {
+                                    onLoadNextPage()
+                                }
+                            }
+
+                            LazyColumn(
+                                state = listState,
+                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(
+                                    items = state.items,
+                                    key = { it.id }
+                                ) { launch ->
+                                    LaunchCard(
+                                        launch = launch,
+                                        onClick = { onLaunchClick(launch.id) }
+                                    )
+                                }
+
+                                if (state.isNextPageLoading) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
+        if (state.isFilterSheetOpen) {
+            FilterBottomSheet(
+                filter = state.filter,
+                onDismiss = onDismissFilter,
+                onApply = { newFilter ->
+                    onFilterChanged(newFilter)
+                    onDismissFilter()
+                },
+                onReset = {
+                    onResetFilter()
+                    onDismissFilter()
+                }
+            )
+        }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Скелетон списка", showBackground = true)
 @Composable
-private fun LaunchListLoadingPreview() {
-    // Мгновенно смотрим, как выглядит лоадер
-    LaunchListContent(
-        state = LaunchListUiState(isLoading = true),
-        onLaunchClick = {},
-        onRetry = {},
-        onFilterSelect = {}
-    )
+private fun LaunchListSkeletonPreview() {
+    MaterialTheme {
+        LaunchListSkeleton()
+    }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun LaunchListErrorPreview() {
-    // Мгновенно смотрим экран с ошибкой
-    LaunchListContent(
-        state = LaunchListUiState(error = "Сервер недоступен"),
-        onLaunchClick = {},
-        onRetry = {},
-        onFilterSelect = {}
-    )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(name = "1. Список с данными", showBackground = true, showSystemUi = true)
 @Composable
 private fun LaunchListPreview() {
-    LaunchListContent(
-        state = LaunchListUiState(items = mockPreviewLaunches),
-        onLaunchClick = {},
-        onRetry = {},
-        onFilterSelect = {}
-    )
+    MaterialTheme {
+        LaunchListContent(
+            state = LaunchListUiState(items = mockPreviewLaunches),
+            onLaunchClick = {},
+            onRetry = {},
+            onOpenFilter = {},
+            onDismissFilter = {},
+            onFilterChanged = {},
+            onResetFilter = {}
+        )
+    }
 }
 
-private val mockPreviewLaunches = listOf(
-    LaunchItem(
-        id = "1",
-        name = "Falcon 1 | DemoSat",
-        status = "Launch Failure",
-        date = "21 марта 2007, 01:10",
-        agency = "SpaceX",
-        imageUrl = "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_image_20190222030438.jpeg"
-    ),
-    LaunchItem(
-        id = "2",
-        name = "Falcon 9 Block 5 | Starlink Group 6-58 (Direct to Cell)",
-        status = "Success",
-        date = "15 мая 2024, 18:30",
-        agency = "SpaceX",
-        imageUrl = "https://thespacedevs-prod.nyc3.digitaloceanspaces.com/media/images/falcon_9_image_20230807133459.jpeg"
-    ),
-    LaunchItem(
-        id = "3",
-        name = "Sputnik 8A91 | D-1 1",
-        status = "Launch Failure",
-        date = "27 апреля 1958, 07:00",
-        agency = "Soviet Space Program",
-        imageUrl = null
-    ),
-    LaunchItem(
-        id = "4",
-        name = "Vanguard | Vanguard TV-3BU",
-        status = "Launch Failure",
-        date = "5 февраля 1958, 07:33",
-        agency = "US Navy",
-        imageUrl = null
-    ),
-    LaunchItem(
-        id = "5",
-        name = "Electron | There and Back Again",
-        status = "Success",
-        date = "2 мая 2022, 22:49",
-        agency = "Rocket Lab",
-        imageUrl = null
-    ),
-    LaunchItem(
-        id = "6",
-        name = "Atlas V 551 | Project Kuiper Protoflight",
-        status = "Success",
-        date = "6 октября 2023, 18:06",
-        agency = "United Launch Alliance",
-        imageUrl = null
-    ),
-    LaunchItem(
-        id = "7",
-        name = "Ariane 5 ECA | James Webb Space Telescope",
-        status = "Success",
-        date = "25 декабря 2021, 12:20",
-        agency = "Arianespace",
-        imageUrl = null
-    ),
-    LaunchItem(
-        id = "8",
-        name = "Starship | Integrated Flight Test 3",
-        status = "Partial Failure",
-        date = "14 марта 2024, 13:25",
-        agency = "SpaceX",
-        imageUrl = null
-    )
-)
+@Preview(name = "2. Список с активными фильтрами", showBackground = true, showSystemUi = true)
+@Composable
+private fun LaunchListWithActiveFiltersPreview() {
+    MaterialTheme {
+        LaunchListContent(
+            state = LaunchListUiState(
+                items = mockPreviewLaunches.take(2),
+                filter = LaunchFilter(
+                    agency = "SpaceX",
+                    statusId = 3,
+                    hasVideoOnly = true
+                )
+            ),
+            onLaunchClick = {},
+            onRetry = {},
+            onOpenFilter = {},
+            onDismissFilter = {},
+            onFilterChanged = {},
+            onResetFilter = {}
+        )
+    }
+}
+
+@Preview(name = "3. Открытая шторка фильтров", showBackground = true)
+@Composable
+private fun FilterBottomSheetPreview() {
+    MaterialTheme {
+        Surface {
+            FilterBottomSheet(
+                filter = LaunchFilter(agency = "SpaceX"),
+                onDismiss = {},
+                onApply = {},
+                onReset = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "4. Загрузка", showBackground = true)
+@Composable
+private fun LaunchListLoadingPreview() {
+    MaterialTheme {
+        LaunchListContent(
+            state = LaunchListUiState(isLoading = true),
+            onLaunchClick = {},
+            onRetry = {},
+            onOpenFilter = {},
+            onDismissFilter = {},
+            onFilterChanged = {},
+            onResetFilter = {}
+        )
+    }
+}
+
+@Preview(name = "5. Ошибка", showBackground = true)
+@Composable
+private fun LaunchListErrorPreview() {
+    MaterialTheme {
+        LaunchListContent(
+            state = LaunchListUiState(error = "Сервер временно недоступен"),
+            onLaunchClick = {},
+            onRetry = {},
+            onOpenFilter = {},
+            onDismissFilter = {},
+            onFilterChanged = {},
+            onResetFilter = {}
+        )
+    }
+}

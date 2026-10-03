@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LaunchListResponseDto(
-    val next: String?,
-    val results: List<LaunchListItemDto>
+    val count: Int = 0,
+    val next: String? = null,
+    val results: List<LaunchListItemDto> = emptyList()
 )

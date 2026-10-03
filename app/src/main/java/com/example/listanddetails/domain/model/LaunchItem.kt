@@ -6,5 +6,8 @@ data class LaunchItem(
     val status: String,
     val date: String,
     val agency: String,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val padName: String? = null,
+    val hasVideo: Boolean = false,
+    val rawDate: String? = null
 )

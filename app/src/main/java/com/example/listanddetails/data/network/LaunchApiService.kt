@@ -10,9 +10,14 @@ interface LaunchApiService {
 
     @GET("2.2.0/launch/")
     suspend fun getListOfLaunches(
-        @Query("mode") mode: String = "list",
+        @Query("mode") mode: String = "detailed",
         @Query("search") search: String? = null,
-        @Query("ordering") ordering: String = "-net"
+        @Query("ordering") ordering: String = "-net",
+        @Query("net__lte") netLte: String? = null,
+        @Query("net__gte") netGte: String? = null,
+        @Query("status") status: Int? = null,
+        @Query("limit") limit: Int = 15,
+        @Query("offset") offset: Int = 0
     ) : LaunchListResponseDto
 
     @GET("2.2.0/launch/{id}/")
