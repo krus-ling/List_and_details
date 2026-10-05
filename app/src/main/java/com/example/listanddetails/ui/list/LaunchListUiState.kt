@@ -78,6 +78,7 @@ data class LaunchListUiState(
     val isNextPageLoading: Boolean = false,
     val items: List<LaunchItem> = emptyList(),
     val totalCount: Int = 0,
+    val searchQuery: String = "",
     val error: String? = null,
     val cooldownSeconds: Int = 0,
     val initialCooldownSeconds: Int = 0,

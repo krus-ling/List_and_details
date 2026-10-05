@@ -1,6 +1,5 @@
 package com.example.listanddetails.ui.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -9,12 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.listanddetails.ui.details.LaunchDetailScreen
-import com.example.listanddetails.ui.list.LaunchListScreen
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
-    initialRoute: Route = Route.LaunchList,
+    initialRoute: Route = Route.MainTab,
     onExitApp: () -> Unit
 ) {
     val backStack = rememberNavBackStack(initialRoute = initialRoute)
@@ -32,14 +30,12 @@ fun AppNavHost(
                     onExitApp()
                 }
             },
-//            transitionSpec = NavTransitions.defaultTransitionSpec(),
-//            popTransitionSpec = NavTransitions.defaultTransitionSpec()
             transitionSpec = NavTransitions.pushTransition(),
             popTransitionSpec = NavTransitions.popTransition()
         ) { key ->
             when (key) {
-                is Route.LaunchList -> NavEntry(key) {
-                    LaunchListScreen(
+                is Route.MainTab, is Route.LaunchList -> NavEntry(key) {
+                    MainTabScreen(
                         onLaunchClick = { launchId ->
                             backStack.add(Route.LaunchDetails(launchId))
                         }

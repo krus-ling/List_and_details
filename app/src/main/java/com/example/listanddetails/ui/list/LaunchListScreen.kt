@@ -1,6 +1,7 @@
 package com.example.listanddetails.ui.list
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +34,7 @@ fun LaunchListScreen(
         state = state,
         onLaunchClick = onLaunchClick,
         onRetry = viewModel::loadLaunches,
+        onSearchQueryChange = viewModel::onSearchQueryChanged,
         onLoadNextPage = viewModel::loadNextPage,
         onOpenFilter = viewModel::openFilterSheet,
         onDismissFilter = viewModel::closeFilterSheet,
@@ -47,6 +49,7 @@ fun LaunchListContent(
     state: LaunchListUiState,
     onLaunchClick: (String) -> Unit,
     onRetry: () -> Unit,
+    onSearchQueryChange: (String) -> Unit = {},
     onLoadNextPage: () -> Unit = {},
     onOpenFilter: () -> Unit,
     onDismissFilter: () -> Unit,
@@ -56,12 +59,13 @@ fun LaunchListContent(
     Scaffold(
         topBar = {
             LaunchListTopBar(
-                filter = state.filter,
+                searchQuery = state.searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
                 isLoading = state.isLoading,
-                hasItems = state.items.isNotEmpty(),
-                onOpenFilter = onOpenFilter
+                hasItems = state.items.isNotEmpty()
             )
-        }
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
 
         when {
@@ -112,10 +116,12 @@ fun LaunchListContent(
                         LaunchesLazyColumn(
                             items = state.items,
                             totalCount = state.totalCount,
+                            filter = state.filter,
                             isLoading = state.isLoading,
                             isNextPageLoading = state.isNextPageLoading,
                             onLaunchClick = onLaunchClick,
-                            onLoadNextPage = onLoadNextPage
+                            onLoadNextPage = onLoadNextPage,
+                            onOpenFilter = onOpenFilter
                         )
                     }
                 }

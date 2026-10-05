@@ -6,15 +6,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -28,15 +32,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.LaunchItem
+import com.example.listanddetails.ui.list.LaunchFilter
 
 @Composable
 fun LaunchesLazyColumn(
     items: List<LaunchItem>,
     totalCount: Int,
+    filter: LaunchFilter,
     isLoading: Boolean,
     isNextPageLoading: Boolean,
     onLaunchClick: (String) -> Unit,
     onLoadNextPage: () -> Unit,
+    onOpenFilter: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listAlpha by animateFloatAsState(
@@ -52,7 +59,7 @@ fun LaunchesLazyColumn(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 16.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -62,6 +69,19 @@ fun LaunchesLazyColumn(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            TextButton(onClick = onOpenFilter) {
+                if (filter.isActive) {
+                    Badge { Text(filter.activeCount.toString()) }
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text(
+                    text = stringResource(R.string.filters_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
         val listState = rememberLazyListState()
@@ -80,7 +100,7 @@ fun LaunchesLazyColumn(
 
         LazyColumn(
             state = listState,
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 4.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 2.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {

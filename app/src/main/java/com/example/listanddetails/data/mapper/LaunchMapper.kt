@@ -1,7 +1,11 @@
 package com.example.listanddetails.data.mapper
 
+import com.example.listanddetails.data.dto.AgencyDto
+import com.example.listanddetails.data.dto.AstronautDto
 import com.example.listanddetails.data.dto.LaunchDetailDto
 import com.example.listanddetails.data.dto.LaunchListItemDto
+import com.example.listanddetails.domain.model.AgencyItem
+import com.example.listanddetails.domain.model.AstronautItem
 import com.example.listanddetails.domain.model.LaunchDetail
 import com.example.listanddetails.domain.model.LaunchItem
 import java.time.Instant
@@ -50,6 +54,30 @@ fun LaunchDetailDto.toDomain(): LaunchDetail = LaunchDetail(
     failReason = failReason,
     videoUrl = vidUrls?.firstOrNull()?.url,
     rawDate = net
+)
+
+fun AgencyDto.toDomain(): AgencyItem = AgencyItem(
+    id = id,
+    name = name,
+    abbrev = abbrev ?: name,
+    type = type,
+    countryCode = countryCode,
+    description = description,
+    administrator = administrator,
+    foundingYear = foundingYear,
+    logoUrl = logoUrl,
+    imageUrl = imageUrl
+)
+
+fun AstronautDto.toDomain(): AstronautItem = AstronautItem(
+    id = id,
+    name = name,
+    status = status?.name,
+    agencyName = agency?.name,
+    nationality = nationality,
+    profileImage = profileImage,
+    bio = bio,
+    dateOfBirth = dateOfBirth
 )
 
 private val russianDateFormatter: DateTimeFormatter by lazy {

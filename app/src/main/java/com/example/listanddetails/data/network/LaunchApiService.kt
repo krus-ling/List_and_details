@@ -1,5 +1,7 @@
 package com.example.listanddetails.data.network
 
+import com.example.listanddetails.data.dto.AgencyListResponseDto
+import com.example.listanddetails.data.dto.AstronautListResponseDto
 import com.example.listanddetails.data.dto.LaunchDetailDto
 import com.example.listanddetails.data.dto.LaunchListResponseDto
 import retrofit2.http.GET
@@ -24,4 +26,18 @@ interface LaunchApiService {
     suspend fun getDetailsLaunch(
         @Path("id") id: String
     ) : LaunchDetailDto
+
+    @GET("2.2.0/agencies/")
+    suspend fun getAgencies(
+        @Query("search") search: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): AgencyListResponseDto
+
+    @GET("2.2.0/astronaut/")
+    suspend fun getAstronauts(
+        @Query("search") search: String? = null,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): AstronautListResponseDto
 }

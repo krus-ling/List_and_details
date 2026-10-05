@@ -19,6 +19,7 @@ private const val NEXT_PAGE_LIMIT = 20
 private const val VIDEO_FETCH_LIMIT = 50
 private const val DEFAULT_COOLDOWN_SECONDS = 30
 private const val HTTP_TOO_MANY_REQUESTS = 429
+private const val SEARCH_DEBOUNCE_MS = 500L
 
 class LaunchListViewModel(
     private val repository: LaunchRepository
@@ -28,6 +29,7 @@ class LaunchListViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var cooldownJob: Job? = null
+    private var searchJob: Job? = null
     private var serverOffset = 0
 
     init {
@@ -73,6 +75,17 @@ class LaunchListViewModel(
             }.onFailure { throwable ->
                 handleError(throwable)
             }
+        }
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _uiState.update { it.copy(searchQuery = query, items = emptyList()) }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            if (query.isNotBlank()) {
+                delay(SEARCH_DEBOUNCE_MS.milliseconds)
+            }
+            loadLaunches()
         }
     }
 
@@ -152,7 +165,8 @@ class LaunchListViewModel(
     }
 
     private fun buildSearchQuery(filter: LaunchFilter): String? {
-        return listOfNotNull(filter.agency, filter.pad)
+        val freeText = _uiState.value.searchQuery.takeIf { it.isNotBlank() }
+        return listOfNotNull(filter.agency, filter.pad, freeText)
             .joinToString(" ")
             .takeIf { it.isNotBlank() }
     }
