@@ -34,17 +34,28 @@ com.example.listanddetails/
 │   │   ├── LaunchListUiState.kt          # UiState, LaunchFilter, DateSortOrder, LaunchFilterOptions
 │   │   └── components/                   # Компоненты экрана списка
 │   │       ├── ActiveFilterChipsRow.kt   # Строка активных чипсов фильтров
+│   │       ├── EmptyLaunchesView.kt      # Компонент пустой выдачи списков
 │   │       ├── FilterBottomSheet.kt      # Нижняя шторка фильтров с FlowRow
 │   │       ├── LaunchCard.kt             # Карточка одного запуска со статусом
+│   │       ├── LaunchesLazyColumn.kt     # Сквозной пагинируемый список с подгрузкой
 │   │       ├── LaunchListErrorView.kt    # Экран ошибки с таймером обратного отсчета
 │   │       ├── LaunchListPreviewData.kt # Моковые данные для Compose Previews
 │   │       ├── LaunchListSkeleton.kt     # Скелетон загрузки с эффектом Shimmer
 │   │       └── LaunchListTopBar.kt       # Верхняя панель со счетчиком фильтров
 │   │
 │   ├── details/                          # Экран детальной информации
-│   │   ├── LaunchDetailScreen.kt         # Экраны деталей, параллакс-хедер и FullScreenImageViewer
+│   │   ├── LaunchDetailScreen.kt         # Главный Composable экрана деталей
 │   │   ├── LaunchDetailViewModel.kt      # ViewModel загрузки деталей
-│   │   └── LaunchDetailUiState.kt        # UiState деталей запуска
+│   │   ├── LaunchDetailUiState.kt        # UiState деталей запуска
+│   │   └── components/                   # Компоненты экрана деталей
+│   │       ├── FullScreenImageViewer.kt  # Полноэкранный просмотрщик фото с Pinch-to-Zoom
+│   │       ├── LaunchDetailHeader.kt     # Параллакс-хедер с фото, градиентом и заголовком
+│   │       ├── LaunchFailureCard.kt      # Карточка с описанием причин сбоя
+│   │       ├── LaunchMissionCard.kt      # Карточка миссии с информацией и переводом
+│   │       ├── LaunchPadCard.kt          # Карточка стартовой площадки и локации
+│   │       ├── LaunchRocketCard.kt       # Карточка ракеты с кликабельной фото
+│   │       ├── LaunchStatusBadge.kt      # Чипс статуса запуска
+│   │       └── TMinusCountdownBadge.kt   # Живой обратный отсчет T-Minus
 │   │
 │   ├── navigation/                       # Навигация (Navigation 3)
 │   │   └── Route.kt                      # Иерархия маршрутов (@Serializable Route)

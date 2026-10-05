@@ -1,43 +1,24 @@
 package com.example.listanddetails.ui.list
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.listanddetails.R
 import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
+import com.example.listanddetails.ui.list.components.EmptyLaunchesView
 import com.example.listanddetails.ui.list.components.FilterBottomSheet
-import com.example.listanddetails.ui.list.components.LaunchCard
 import com.example.listanddetails.ui.list.components.LaunchListErrorView
 import com.example.listanddetails.ui.list.components.LaunchListSkeleton
 import com.example.listanddetails.ui.list.components.LaunchListTopBar
+import com.example.listanddetails.ui.list.components.LaunchesLazyColumn
 import com.example.listanddetails.ui.list.components.mockPreviewLaunches
 import org.koin.androidx.compose.koinViewModel
 
@@ -72,11 +53,6 @@ fun LaunchListContent(
     onFilterChanged: (LaunchFilter) -> Unit,
     onResetFilter: () -> Unit
 ) {
-    val listAlpha by animateFloatAsState(
-        targetValue = if (state.isLoading && state.items.isNotEmpty()) 0.5f else 1.0f,
-        label = "listAlpha"
-    )
-
     Scaffold(
         topBar = {
             LaunchListTopBar(
@@ -131,83 +107,16 @@ fun LaunchListContent(
                     }
 
                     if (state.items.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.no_launches_found),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        EmptyLaunchesView()
                     } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .alpha(listAlpha)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.launches_found, state.totalCount),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            val listState = rememberLazyListState()
-                            val shouldLoadMore = remember {
-                                derivedStateOf {
-                                    val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-                                    lastVisibleItem != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 3
-                                }
-                            }
-
-                            LaunchedEffect(shouldLoadMore.value) {
-                                if (shouldLoadMore.value) {
-                                    onLoadNextPage()
-                                }
-                            }
-
-                            LazyColumn(
-                                state = listState,
-                                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 4.dp),
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(
-                                    items = state.items,
-                                    key = { it.id }
-                                ) { launch ->
-                                    LaunchCard(
-                                        launch = launch,
-                                        onClick = { onLaunchClick(launch.id) }
-                                    )
-                                }
-
-                                if (state.isNextPageLoading) {
-                                    item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            CircularProgressIndicator()
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        LaunchesLazyColumn(
+                            items = state.items,
+                            totalCount = state.totalCount,
+                            isLoading = state.isLoading,
+                            isNextPageLoading = state.isNextPageLoading,
+                            onLaunchClick = onLaunchClick,
+                            onLoadNextPage = onLoadNextPage
+                        )
                     }
                 }
             }
