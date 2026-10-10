@@ -1,9 +1,10 @@
 package com.example.listanddetails.data.dto
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class LaunchStatusDto(
-    @SerializedName("id") val id: Int,
-    @SerializedName("name") val name: String,
-    @SerializedName("abbrev") val abbrev: String?,
+    val id: Int,
+    val name: String,
+    val abbrev: String?,
 )

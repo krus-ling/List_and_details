@@ -1,3 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">List and details</string>
+    <string name="app_title">Космические запуски</string>
+    <string name="search_placeholder">Поиск...</string>
+    <string name="filters_title">Фильтры</string>
+    <string name="filters_setup">Настройка фильтров</string>
+    <string name="launches_found">Найдено запусков: %1$d</string>
+    <string name="no_launches_found">Нет запусков, соответствующих выбранным фильтрам</string>
+    <string name="agencies_title">Космические агентства</string>
+    <string name="agencies_found">Найдено агентств: %1$d</string>
+    <string name="no_agencies_found">Агентства не найдены</string>
+    <string name="astronauts_title">Космонавты и астронавты</string>
+    <string name="astronauts_found">Найдено космонавтов: %1$d</string>
+    <string name="no_astronauts_found">Космонавты не найдены</string>
+    <string name="tab_launches">Запуски</string>
+    <string name="tab_agencies">Агентства</string>
+    <string name="tab_astronauts">Космонавты</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="rate_limit_error">Превышен лимит запросов к API (макс. 15 в минуту).</string>
+    <string name="wait_cooldown">Подождите %1$d сек. перед следующим запросом</string>
+    <string name="retry">Повторить</string>
+    <string name="retry_cooldown">Повторить (%1$d сек)</string>
+    <string name="reset">Сбросить</string>
+    <string name="reset_all">Сбросить все</string>
+    <string name="apply">Применить</string>
+    <string name="back">Назад</string>
+    <string name="close">Закрыть</string>
+    <string name="unknown">Неизвестно</string>
+    <string name="not_specified">Не указана</string>
+    <string name="unknown_rocket">Неизвестная ракета</string>
+    <string name="unknown_mission">Неизвестная миссия</string>
+    <string name="launch_details">Детали запуска</string>
+    <string name="launch_failure">Сбой запуска</string>
+    <string name="failure_reason_missing">Запуск завершился неудачей. Подробные данные о причинах сбоя в архиве отсутствуют.</string>
+    <string name="mission_prefix">Миссия: %1$s</string>
+    <string name="mission_type_prefix">Тип: %1$s</string>
+    <string name="orbit_prefix">Орбита: %1$s</string>
+    <string name="rocket_prefix">Ракета: %1$s</string>
+    <string name="founding_year_prefix">Основано: %1$s г.</string>
+    <string name="born_prefix">Дата рождения: %1$s</string>
+    <string name="launch_pad_complex">Стартовый комплекс</string>
+    <string name="pad_prefix">Площадка: %1$s</string>
+    <string name="location_prefix">Локация: %1$s</string>
+    <string name="watch_broadcast">Смотреть трансляцию</string>
+    <string name="watch_video">Смотреть видео</string>
+
+    <!-- Filter options -->
+    <string name="filter_sort_date">Сортировка по дате</string>
+    <string name="filter_sort_newest">Сначала новые</string>
+    <string name="filter_sort_oldest">Сначала старые</string>
+    <string name="filter_launch_status">Статус запуска</string>
+    <string name="filter_agency">Космическое агентство</string>
+    <string name="filter_pad">Стартовая площадка</string>
+    <string name="filter_year">Год запуска</string>
+    <string name="filter_video_only">Только с видео</string>
+    <string name="filter_all">Все</string>
+    <string name="filter_all_years">Все годы</string>
+
+    <!-- Status titles -->
+    <string name="status_successful">Успешные</string>
+    <string name="status_failures">Аварии</string>
+    <string name="status_partial_failure">Частичный сбой</string>
+    <string name="status_planned">Запланированные</string>
+    <string name="status_tbd">В ожидании (TBD)</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_delete_agency_filter">Удалить фильтр агентства</string>
+    <string name="cd_delete_status_filter">Удалить фильтр статуса</string>
+    <string name="cd_delete_year_filter">Удалить фильтр года</string>
+    <string name="cd_delete_pad_filter">Удалить фильтр площадки</string>
+    <string name="cd_delete_video_filter">Снять фильтр видео</string>
 </resources>
