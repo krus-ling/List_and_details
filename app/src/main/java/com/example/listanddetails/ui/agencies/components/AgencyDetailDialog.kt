@@ -43,8 +43,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.example.listanddetails.R
+import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.model.AgencyItem
-import com.example.listanddetails.domain.translation.TranslationManager
 import kotlinx.coroutines.launch
 
 @Composable
@@ -57,7 +57,7 @@ fun AgencyDetailDialog(
     var isTranslated by remember { mutableStateOf(false) }
     var translatedDescription by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val translationManager = remember { TranslationManager() }
+    val translationManager = remember { MlKitTextTranslator() }
 
     DisposableEffect(Unit) {
         onDispose { translationManager.close() }

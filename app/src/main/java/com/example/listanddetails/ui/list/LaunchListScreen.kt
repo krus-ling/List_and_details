@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.listanddetails.domain.model.LaunchFilter
 import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
 import com.example.listanddetails.ui.list.components.EmptyLaunchesView
 import com.example.listanddetails.ui.list.components.FilterBottomSheet

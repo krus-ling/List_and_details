@@ -4,6 +4,8 @@ import android.app.Application
 import com.example.listanddetails.di.networkModule
 import com.example.listanddetails.di.presentationModule
 import com.example.listanddetails.di.repositoryModule
+import com.example.listanddetails.di.translationModule
+import com.example.listanddetails.di.useCaseModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -19,7 +21,9 @@ class App : Application() {
             modules(
                 networkModule,
                 repositoryModule,
-                presentationModule
+                useCaseModule,
+                presentationModule,
+                translationModule
             )
         }
     }

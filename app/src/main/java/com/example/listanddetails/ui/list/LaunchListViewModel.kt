@@ -2,7 +2,8 @@ package com.example.listanddetails.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.listanddetails.domain.repository.LaunchRepository
+import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.usecase.GetLaunchesUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,19 +11,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val INITIAL_PAGE_LIMIT = 15
-private const val NEXT_PAGE_LIMIT = 20
-private const val VIDEO_FETCH_LIMIT = 50
 private const val DEFAULT_COOLDOWN_SECONDS = 30
 private const val HTTP_TOO_MANY_REQUESTS = 429
 private const val SEARCH_DEBOUNCE_MS = 500L
 
 class LaunchListViewModel(
-    private val repository: LaunchRepository
+    private val getLaunchesUseCase: GetLaunchesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LaunchListUiState())
@@ -45,30 +41,17 @@ class LaunchListViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, cooldownSeconds = 0) }
 
-            val (netGte, netLte) = buildDateRange(currentFilter)
-            val searchQuery = buildSearchQuery(currentFilter)
-            val fetchLimit = if (currentFilter.hasVideoOnly) VIDEO_FETCH_LIMIT else INITIAL_PAGE_LIMIT
-
-            repository.getListOfLaunches(
-                search = searchQuery,
-                ordering = currentFilter.sortOrder.apiValue,
-                netLte = netLte,
-                netGte = netGte,
-                statusId = currentFilter.statusId,
-                limit = fetchLimit,
-                offset = 0
+            getLaunchesUseCase(
+                filter = currentFilter,
+                searchQuery = _uiState.value.searchQuery,
+                offset = 0,
+                isInitialPage = true
             ).onSuccess { result ->
-                serverOffset = result.items.size
-                val finalItems = if (currentFilter.hasVideoOnly) {
-                    result.items.filter { it.hasVideo }
-                } else {
-                    result.items
-                }
-
+                serverOffset = result.fetchedCount
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        items = finalItems,
+                        items = result.items,
                         totalCount = result.totalCount
                     )
                 }
@@ -99,30 +82,17 @@ class LaunchListViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isNextPageLoading = true) }
 
-            val (netGte, netLte) = buildDateRange(currentFilter)
-            val searchQuery = buildSearchQuery(currentFilter)
-            val fetchLimit = if (currentFilter.hasVideoOnly) VIDEO_FETCH_LIMIT else NEXT_PAGE_LIMIT
-
-            repository.getListOfLaunches(
-                search = searchQuery,
-                ordering = currentFilter.sortOrder.apiValue,
-                netLte = netLte,
-                netGte = netGte,
-                statusId = currentFilter.statusId,
-                limit = fetchLimit,
-                offset = serverOffset
+            getLaunchesUseCase(
+                filter = currentFilter,
+                searchQuery = state.searchQuery,
+                offset = serverOffset,
+                isInitialPage = false
             ).onSuccess { result ->
-                serverOffset += result.items.size
-                val newItems = if (currentFilter.hasVideoOnly) {
-                    result.items.filter { it.hasVideo }
-                } else {
-                    result.items
-                }
-
+                serverOffset += result.fetchedCount
                 _uiState.update {
                     it.copy(
                         isNextPageLoading = false,
-                        items = it.items + newItems,
+                        items = it.items + result.items,
                         totalCount = result.totalCount
                     )
                 }
@@ -147,28 +117,6 @@ class LaunchListViewModel(
 
     fun closeFilterSheet() {
         _uiState.update { it.copy(isFilterSheetOpen = false) }
-    }
-
-    private fun buildDateRange(filter: LaunchFilter): Pair<String?, String?> {
-        val nowIso = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
-        return when {
-            filter.year != null -> {
-                Pair("${filter.year}-01-01T00:00:00Z", "${filter.year}-12-31T23:59:59Z")
-            }
-            filter.hasVideoOnly -> {
-                Pair(null, nowIso)
-            }
-            else -> {
-                Pair(null, null)
-            }
-        }
-    }
-
-    private fun buildSearchQuery(filter: LaunchFilter): String? {
-        val freeText = _uiState.value.searchQuery.takeIf { it.isNotBlank() }
-        return listOfNotNull(filter.agency, filter.pad, freeText)
-            .joinToString(" ")
-            .takeIf { it.isNotBlank() }
     }
 
     private fun handleError(throwable: Throwable) {

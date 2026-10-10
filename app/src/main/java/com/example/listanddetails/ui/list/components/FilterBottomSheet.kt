@@ -35,9 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.listanddetails.R
-import com.example.listanddetails.ui.list.DateSortOrder
-import com.example.listanddetails.ui.list.LaunchFilter
-import com.example.listanddetails.ui.list.LaunchFilterOptions
+import com.example.listanddetails.domain.model.DateSortOrder
+import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchFilterOptions
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

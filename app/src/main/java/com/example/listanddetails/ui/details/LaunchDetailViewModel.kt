@@ -1,10 +1,9 @@
 package com.example.listanddetails.ui.details
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.repository.LaunchRepository
-import com.example.listanddetails.domain.translation.TranslationManager
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 class LaunchDetailViewModel(
     private val repository: LaunchRepository,
     private val launchId: String,
-    private val translationManager: TranslationManager = TranslationManager()
+    private val translationManager: MlKitTextTranslator = MlKitTextTranslator()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LaunchDetailUiState())
@@ -62,10 +61,6 @@ class LaunchDetailViewModel(
             val missionType = currentLaunch.missionType
             val orbit = currentLaunch.orbit
 
-            val translatedDesc = if (!desc.isNullOrBlank()) {
-                translationManager.translate(desc).getOrNull()
-            } else null
-
             val (transDesc, transFail, transType, transOrbit) = coroutineScope {
                 val d = async { if (!desc.isNullOrBlank()) translationManager.translate(desc).getOrNull() else null }
                 val f = async { if (!failReason.isNullOrBlank()) translationManager.translate(failReason).getOrNull() else null }
@@ -78,7 +73,7 @@ class LaunchDetailViewModel(
                 it.copy(
                     isTranslating = false,
                     isTranslated = true,
-                    translatedDescription = translatedDesc ?: desc,
+                    translatedDescription = transDesc ?: desc,
                     translatedFailReason = transFail ?: failReason,
                     translatedMissionType = transType ?: missionType,
                     translatedOrbit = transOrbit ?: orbit

@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.listanddetails.R
+import com.example.listanddetails.domain.model.LaunchFilter
 import com.example.listanddetails.domain.model.LaunchItem
-import com.example.listanddetails.ui.list.LaunchFilter
 
 @Composable
 fun LaunchesLazyColumn(

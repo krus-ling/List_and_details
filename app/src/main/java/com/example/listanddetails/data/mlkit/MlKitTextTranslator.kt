@@ -1,5 +1,6 @@
-package com.example.listanddetails.domain.translation
+package com.example.listanddetails.data.mlkit
 
+import com.example.listanddetails.domain.repository.TextTranslator
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
@@ -9,8 +10,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class TranslationManager {
-
+class MlKitTextTranslator : TextTranslator {
     private val options = TranslatorOptions.Builder()
         .setSourceLanguage(TranslateLanguage.ENGLISH)
         .setTargetLanguage(TranslateLanguage.RUSSIAN)
@@ -21,7 +21,7 @@ class TranslationManager {
     /**
      * Скачивает языковой пакет (если еще не скачан) и переводит текст
      */
-    suspend fun translate(text: String): Result<String> = runCatching {
+    override suspend fun translate(text: String): Result<String> = runCatching {
         if (text.isBlank()) return@runCatching text
 
         // Проверяем / скачиваем языковую модель при необходимости

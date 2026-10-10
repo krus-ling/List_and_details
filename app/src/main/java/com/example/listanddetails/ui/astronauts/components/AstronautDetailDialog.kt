@@ -44,8 +44,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.example.listanddetails.R
+import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.model.AstronautItem
-import com.example.listanddetails.domain.translation.TranslationManager
 import com.example.listanddetails.ui.details.components.FullScreenImageViewer
 import kotlinx.coroutines.launch
 
@@ -60,7 +60,7 @@ fun AstronautDetailDialog(
     var isTranslated by remember { mutableStateOf(false) }
     var translatedBio by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val translationManager = remember { TranslationManager() }
+    val translationManager = remember { MlKitTextTranslator() }
 
     DisposableEffect(Unit) {
         onDispose { translationManager.close() }

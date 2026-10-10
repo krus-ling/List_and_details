@@ -10,3 +10,5 @@
 local.properties
 /graphify-out/
 /graphify-out/cache/
+graph.json
+graph.html

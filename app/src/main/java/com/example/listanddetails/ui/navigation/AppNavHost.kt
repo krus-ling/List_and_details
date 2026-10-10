@@ -30,8 +30,8 @@ fun AppNavHost(
                     onExitApp()
                 }
             },
-            transitionSpec = NavTransitions.pushTransition(),
-            popTransitionSpec = NavTransitions.popTransition()
+            transitionSpec = NavTransitions.pushTransition,
+            popTransitionSpec = NavTransitions.popTransition
         ) { key ->
             when (key) {
                 is Route.MainTab, is Route.LaunchList -> NavEntry(key) {

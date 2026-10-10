@@ -16,21 +16,21 @@ object NavTransitions {
     private val Easing = FastOutSlowInEasing
 
     // Переход вперед: Новый экран приближается, старый утапливается
-    fun pushTransition(): AnimatedContentTransitionScope<Scene<Route>>.() -> ContentTransform = {
+    val pushTransition: AnimatedContentTransitionScope<Scene<Route>>.() -> ContentTransform = {
         (scaleIn(
             initialScale = 0.88f,
-            animationSpec = tween(DURATION_MS, easing = Easing)
+            animationSpec = tween(DURATION_MS, easing = Easing),
         ) + fadeIn(animationSpec = tween(DURATION_MS, easing = Easing)))
             .togetherWith(
                 scaleOut(
                     targetScale = 0.94f,
-                    animationSpec = tween(DURATION_MS, easing = Easing)
+                    animationSpec = tween(DURATION_MS, easing = Easing),
                 ) + fadeOut(animationSpec = tween(DURATION_MS / 2, easing = Easing))
             )
     }
 
     // Переход назад: Текущий экран уменьшается и растворяется, предыдущий возвращается
-    fun popTransition(): AnimatedContentTransitionScope<Scene<Route>>.() -> ContentTransform = {
+    val popTransition: AnimatedContentTransitionScope<Scene<Route>>.() -> ContentTransform = {
         (scaleIn(
             initialScale = 0.94f,
             animationSpec = tween(DURATION_MS, easing = Easing)

@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.listanddetails.R
-import com.example.listanddetails.ui.list.LaunchFilter
-import com.example.listanddetails.ui.list.LaunchFilterOptions
+import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchFilterOptions
 
 @Composable
 fun ActiveFilterChipsRow(
