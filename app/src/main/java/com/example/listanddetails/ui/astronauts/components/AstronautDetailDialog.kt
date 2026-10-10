@@ -44,25 +44,26 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.example.listanddetails.R
-import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.model.AstronautItem
+import com.example.listanddetails.domain.repository.TextTranslator
 import com.example.listanddetails.ui.details.components.FullScreenImageViewer
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun AstronautDetailDialog(
     astronaut: AstronautItem,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    translationManager: TextTranslator = koinInject()
 ) {
     var isImageViewerOpen by remember { mutableStateOf(false) }
     var isTranslating by remember { mutableStateOf(false) }
     var isTranslated by remember { mutableStateOf(false) }
     var translatedBio by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val translationManager = remember { MlKitTextTranslator() }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(translationManager) {
         onDispose { translationManager.close() }
     }
 

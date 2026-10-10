@@ -37,7 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.DateSortOrder
 import com.example.listanddetails.domain.model.LaunchFilter
-import com.example.listanddetails.domain.model.LaunchFilterOptions
+import com.example.listanddetails.ui.list.LaunchFilterOptions
+import com.example.listanddetails.ui.list.title
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

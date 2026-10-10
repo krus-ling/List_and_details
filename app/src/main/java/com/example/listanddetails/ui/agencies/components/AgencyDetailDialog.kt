@@ -43,23 +43,24 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.example.listanddetails.R
-import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.model.AgencyItem
+import com.example.listanddetails.domain.repository.TextTranslator
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun AgencyDetailDialog(
     agency: AgencyItem,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    translationManager: TextTranslator = koinInject()
 ) {
     var isTranslating by remember { mutableStateOf(false) }
     var isTranslated by remember { mutableStateOf(false) }
     var translatedDescription by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val translationManager = remember { MlKitTextTranslator() }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(translationManager) {
         onDispose { translationManager.close() }
     }
 

@@ -16,7 +16,8 @@ val presentationModule = module {
     viewModel { (launchId: String) ->
         LaunchDetailViewModel(
             repository = get(),
-            launchId = launchId
+            launchId = launchId,
+            translationManager = get()
         )
     }
 }

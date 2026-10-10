@@ -54,7 +54,7 @@ class MlKitTextTranslator : TextTranslator {
         }
     }
 
-    fun close() {
+    override fun close() {
         englishRussianTranslator.close()
     }
 }

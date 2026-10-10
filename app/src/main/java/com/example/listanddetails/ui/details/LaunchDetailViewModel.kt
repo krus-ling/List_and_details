@@ -2,8 +2,8 @@ package com.example.listanddetails.ui.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.listanddetails.data.mlkit.MlKitTextTranslator
 import com.example.listanddetails.domain.repository.LaunchRepository
+import com.example.listanddetails.domain.repository.TextTranslator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class LaunchDetailViewModel(
     private val repository: LaunchRepository,
     private val launchId: String,
-    private val translationManager: MlKitTextTranslator = MlKitTextTranslator()
+    private val translationManager: TextTranslator,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LaunchDetailUiState())
