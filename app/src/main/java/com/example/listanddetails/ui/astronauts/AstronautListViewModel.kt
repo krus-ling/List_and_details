@@ -2,7 +2,10 @@ package com.example.listanddetails.ui.astronauts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.listanddetails.domain.repository.AstronautRepository
+import com.example.listanddetails.data.mapper.toAppError
+import com.example.listanddetails.domain.model.AppError
+import com.example.listanddetails.domain.usecase.GetAstronautsUseCase
+import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,13 +18,14 @@ private const val PAGE_LIMIT = 20
 private const val SEARCH_DEBOUNCE_MS = 500L
 
 class AstronautListViewModel(
-    private val repository: AstronautRepository
+    private val getAstronautsUseCase: GetAstronautsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AstronautListUiState())
     val uiState = _uiState.asStateFlow()
 
     private var searchJob: Job? = null
+    private var cooldownJob: Job? = null
     private var serverOffset = 0
 
     init {
@@ -29,32 +33,31 @@ class AstronautListViewModel(
     }
 
     fun loadAstronauts() {
+        cooldownJob?.cancel()
         serverOffset = 0
         val query = _uiState.value.searchQuery.takeIf { it.isNotBlank() }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            repository.getAstronauts(search = query, limit = PAGE_LIMIT, offset = 0)
+            _uiState.update { it.copy(isLoading = true, error = null, cooldownSeconds = 0) }
+            getAstronautsUseCase(search = query, limit = PAGE_LIMIT, offset = 0)
                 .onSuccess { result ->
                     serverOffset = result.items.size
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             items = result.items,
-                            totalCount = result.totalCount
+                            totalCount = result.totalCount,
                         )
                     }
                 }
                 .onFailure { throwable ->
-                    _uiState.update {
-                        it.copy(isLoading = false, error = throwable.message)
-                    }
+                    handleError(throwable)
                 }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
-        _uiState.update { it.copy(searchQuery = query, items = emptyList()) }
+        _uiState.update { it.copy(searchQuery = query) }
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             if (query.isNotBlank()) {
@@ -65,28 +68,72 @@ class AstronautListViewModel(
     }
 
     fun loadNextPage() {
-        val state = _uiState.value
-        if (state.isLoading || state.isNextPageLoading) return
-        if (state.totalCount in 1..serverOffset) return
+        var shouldFetch = false
+        var query: String? = null
 
-        val query = state.searchQuery.takeIf { it.isNotBlank() }
+        _uiState.update { state ->
+            if (state.isLoading || state.isNextPageLoading || state.cooldownSeconds > 0) return@update state
+            if (state.totalCount in 1..serverOffset) return@update state
+            shouldFetch = true
+            query = state.searchQuery.takeIf { it.isNotBlank() }
+            state.copy(isNextPageLoading = true)
+        }
+
+        if (!shouldFetch) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isNextPageLoading = true) }
-            repository.getAstronauts(search = query, limit = PAGE_LIMIT, offset = serverOffset)
+            getAstronautsUseCase(search = query, limit = PAGE_LIMIT, offset = serverOffset)
                 .onSuccess { result ->
                     serverOffset += result.items.size
                     _uiState.update {
                         it.copy(
                             isNextPageLoading = false,
-                            items = it.items + result.items,
-                            totalCount = result.totalCount
+                            items = (it.items + result.items).distinctBy { item -> item.id },
+                            totalCount = result.totalCount,
                         )
                     }
                 }
-                .onFailure {
+                .onFailure { throwable ->
                     _uiState.update { it.copy(isNextPageLoading = false) }
+                    handleError(throwable)
                 }
+        }
+    }
+
+    private fun handleError(throwable: Throwable) {
+        val appError = throwable.toAppError()
+        val errorResult = throwable.handleAppError()
+
+        if (appError is AppError.RateLimit) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    cooldownSeconds = appError.cooldownSeconds,
+                    initialCooldownSeconds = appError.cooldownSeconds,
+                    error = errorResult.errorMessage,
+                )
+            }
+            startCooldownTimer(appError.cooldownSeconds)
+        } else {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    error = errorResult.errorMessage,
+                )
+            }
+        }
+    }
+
+    private fun startCooldownTimer(seconds: Int) {
+        cooldownJob?.cancel()
+        cooldownJob = viewModelScope.launch {
+            var timeLeft = seconds
+            while (timeLeft > 0) {
+                delay(1000L.milliseconds)
+                timeLeft--
+                _uiState.update { it.copy(cooldownSeconds = timeLeft) }
+            }
+            _uiState.update { it.copy(error = null) }
         }
     }
 }

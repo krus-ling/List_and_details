@@ -53,12 +53,13 @@ fun AgencyDetailDialog(
     agency: AgencyItem,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    translationManager: TextTranslator = koinInject()
+    translationManager: TextTranslator = koinInject(),
 ) {
+    val scope = rememberCoroutineScope()
+
     var isTranslating by remember { mutableStateOf(false) }
     var isTranslated by remember { mutableStateOf(false) }
     var translatedDescription by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
 
     DisposableEffect(translationManager) {
         onDispose { translationManager.close() }

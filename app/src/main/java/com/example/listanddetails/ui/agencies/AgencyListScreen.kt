@@ -35,6 +35,8 @@ import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.AgencyItem
 import com.example.listanddetails.ui.agencies.components.AgencyCard
 import com.example.listanddetails.ui.agencies.components.AgencyDetailDialog
+import com.example.listanddetails.ui.components.AppErrorBanner
+import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.components.RocketLoadingIndicator
 import com.example.listanddetails.ui.components.SearchBarTopBar
 import org.koin.androidx.compose.koinViewModel
@@ -88,26 +90,12 @@ fun AgencyListContent(
             }
 
             state.error != null && state.items.isEmpty() -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = state.error,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(
-                        onClick = onRetry,
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text(stringResource(R.string.retry))
-                    }
-                }
+                AppErrorView(
+                    message = state.error,
+                    onRetry = onRetry,
+                    cooldownSeconds = state.cooldownSeconds,
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
 
             else -> {
@@ -131,6 +119,14 @@ fun AgencyListContent(
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
+                        if (state.error != null) {
+                            AppErrorBanner(
+                                message = state.error,
+                                onRetry = onRetry,
+                                cooldownSeconds = state.cooldownSeconds
+                            )
+                        }
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

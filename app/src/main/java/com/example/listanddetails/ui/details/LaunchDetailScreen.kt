@@ -53,6 +53,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.LaunchDetail
+import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.components.RocketLoadingIndicator
 import com.example.listanddetails.ui.details.components.FullScreenImageViewer
 import com.example.listanddetails.ui.details.components.LaunchDetailHeader
@@ -105,26 +106,37 @@ fun LaunchDetailContent(
         when {
             state.isLoading && state.launch == null -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    RocketLoadingIndicator()
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(8.dp)
+                            .align(Alignment.TopStart)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        RocketLoadingIndicator()
+                    }
                 }
             }
 
             state.error != null && state.launch == null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = state.error, style = MaterialTheme.typography.bodyLarge)
-                    Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-                        Text(stringResource(R.string.retry))
-                    }
-                }
+                AppErrorView(
+                    message = state.error,
+                    onRetry = onRetry,
+                    onBackClick = onBackClick,
+                )
             }
 
             else -> {

@@ -2,19 +2,19 @@ package com.example.listanddetails.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.listanddetails.data.mapper.toAppError
+import com.example.listanddetails.domain.model.AppError
 import com.example.listanddetails.domain.model.LaunchFilter
 import com.example.listanddetails.domain.usecase.GetLaunchesUseCase
+import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import kotlin.time.Duration.Companion.milliseconds
 
-private const val DEFAULT_COOLDOWN_SECONDS = 30
-private const val HTTP_TOO_MANY_REQUESTS = 429
 private const val SEARCH_DEBOUNCE_MS = 500L
 
 class LaunchListViewModel(
@@ -62,7 +62,7 @@ class LaunchListViewModel(
     }
 
     fun onSearchQueryChanged(query: String) {
-        _uiState.update { it.copy(searchQuery = query, items = emptyList()) }
+        _uiState.update { it.copy(searchQuery = query) }
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             if (query.isNotBlank()) {
@@ -73,18 +73,25 @@ class LaunchListViewModel(
     }
 
     fun loadNextPage() {
-        val state = _uiState.value
-        if (state.isLoading || state.isNextPageLoading || state.cooldownSeconds > 0) return
-        if (state.totalCount in 1..serverOffset) return
+        var shouldFetch = false
+        var currentFilter = LaunchFilter()
+        var currentSearchQuery = ""
 
-        val currentFilter = state.filter
+        _uiState.update { state ->
+            if (state.isLoading || state.isNextPageLoading || state.cooldownSeconds > 0) return@update state
+            if (state.totalCount in 1..serverOffset) return@update state
+            shouldFetch = true
+            currentFilter = state.filter
+            currentSearchQuery = state.searchQuery
+            state.copy(isNextPageLoading = true)
+        }
+
+        if (!shouldFetch) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isNextPageLoading = true) }
-
             getLaunchesUseCase(
                 filter = currentFilter,
-                searchQuery = state.searchQuery,
+                searchQuery = currentSearchQuery,
                 offset = serverOffset,
                 isInitialPage = false
             ).onSuccess { result ->
@@ -92,18 +99,19 @@ class LaunchListViewModel(
                 _uiState.update {
                     it.copy(
                         isNextPageLoading = false,
-                        items = it.items + result.items,
+                        items = (it.items + result.items).distinctBy { item -> item.id },
                         totalCount = result.totalCount
                     )
                 }
-            }.onFailure {
+            }.onFailure { throwable ->
                 _uiState.update { it.copy(isNextPageLoading = false) }
+                handleError(throwable)
             }
         }
     }
 
     fun onFilterChanged(newFilter: LaunchFilter) {
-        _uiState.update { it.copy(filter = newFilter, items = emptyList()) }
+        _uiState.update { it.copy(filter = newFilter) }
         loadLaunches()
     }
 
@@ -120,21 +128,25 @@ class LaunchListViewModel(
     }
 
     private fun handleError(throwable: Throwable) {
-        if (throwable is HttpException && throwable.code() == HTTP_TOO_MANY_REQUESTS) {
-            val retryAfterHeader = throwable.response()?.headers()?.get("Retry-After")?.toIntOrNull()
-            val secondsToWait = retryAfterHeader ?: DEFAULT_COOLDOWN_SECONDS
+        val appError = throwable.toAppError()
+        val errorResult = throwable.handleAppError()
 
+        if (appError is AppError.RateLimit) {
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    cooldownSeconds = secondsToWait,
-                    initialCooldownSeconds = secondsToWait
+                    cooldownSeconds = appError.cooldownSeconds,
+                    initialCooldownSeconds = appError.cooldownSeconds,
+                    error = errorResult.errorMessage,
                 )
             }
-            startCooldownTimer(secondsToWait)
+            startCooldownTimer(appError.cooldownSeconds)
         } else {
             _uiState.update {
-                it.copy(isLoading = false, error = throwable.message)
+                it.copy(
+                    isLoading = false,
+                    error = errorResult.errorMessage,
+                )
             }
         }
     }

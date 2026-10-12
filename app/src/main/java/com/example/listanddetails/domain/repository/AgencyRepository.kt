@@ -1,5 +1,6 @@
 package com.example.listanddetails.domain.repository
 
+import com.example.listanddetails.domain.model.AgencyItem
 import com.example.listanddetails.domain.model.AgencyListResult
 
 interface AgencyRepository {

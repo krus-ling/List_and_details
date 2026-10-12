@@ -14,10 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.ui.components.AppErrorBanner
+import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
 import com.example.listanddetails.ui.list.components.EmptyLaunchesView
 import com.example.listanddetails.ui.list.components.FilterBottomSheet
-import com.example.listanddetails.ui.list.components.LaunchListErrorView
 import com.example.listanddetails.ui.list.components.LaunchListSkeleton
 import com.example.listanddetails.ui.list.components.LaunchListTopBar
 import com.example.listanddetails.ui.list.components.LaunchesLazyColumn
@@ -88,13 +89,25 @@ fun LaunchListContent(
             }
 
             state.error != null && state.items.isEmpty() -> {
-                LaunchListErrorView(
-                    error = state.error,
-                    cooldownSeconds = state.cooldownSeconds,
-                    initialCooldownSeconds = state.initialCooldownSeconds,
-                    onRetry = onRetry,
-                    modifier = Modifier.padding(innerPadding)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    if (state.filter.isActive) {
+                        ActiveFilterChipsRow(
+                            filter = state.filter,
+                            onFilterChanged = onFilterChanged,
+                            onResetFilter = onResetFilter
+                        )
+                    }
+                    AppErrorView(
+                        message = state.error,
+                        onRetry = onRetry,
+                        cooldownSeconds = state.cooldownSeconds,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             else -> {
@@ -108,6 +121,14 @@ fun LaunchListContent(
                             filter = state.filter,
                             onFilterChanged = onFilterChanged,
                             onResetFilter = onResetFilter
+                        )
+                    }
+
+                    if (state.error != null) {
+                        AppErrorBanner(
+                            message = state.error,
+                            onRetry = onRetry,
+                            cooldownSeconds = state.cooldownSeconds
                         )
                     }
 
