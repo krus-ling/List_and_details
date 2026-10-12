@@ -8,5 +8,7 @@ data class AgencyListUiState(
     val items: List<AgencyItem> = emptyList(),
     val totalCount: Int = 0,
     val searchQuery: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val cooldownSeconds: Int = 0,
+    val initialCooldownSeconds: Int = 0
 )

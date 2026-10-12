@@ -2,8 +2,9 @@ package com.example.listanddetails.ui.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.listanddetails.domain.repository.LaunchRepository
 import com.example.listanddetails.domain.repository.TextTranslator
+import com.example.listanddetails.domain.usecase.GetLaunchDetailUseCase
+import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LaunchDetailViewModel(
-    private val repository: LaunchRepository,
+    private val getLaunchDetailUseCase: GetLaunchDetailUseCase,
     private val launchId: String,
     private val translationManager: TextTranslator,
 ) : ViewModel() {
@@ -26,13 +27,24 @@ class LaunchDetailViewModel(
 
     fun loadLaunch() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            repository.getLaunchForId(launchId)
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            getLaunchDetailUseCase(launchId)
                 .onSuccess { detail ->
-                    _uiState.update { it.copy(isLoading = false, launch = detail) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            launch = detail
+                        )
+                    }
                 }
                 .onFailure { throwable ->
-                    _uiState.update { it.copy(isLoading = false, error = throwable.message ?: "Неизвестная ошибка") }
+                    val errorResult = throwable.handleAppError()
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = errorResult.errorMessage,
+                        )
+                    }
                 }
         }
     }
@@ -80,10 +92,5 @@ class LaunchDetailViewModel(
                 )
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        translationManager.close()
     }
 }

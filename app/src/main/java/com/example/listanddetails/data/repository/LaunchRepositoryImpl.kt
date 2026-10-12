@@ -2,14 +2,16 @@ package com.example.listanddetails.data.repository
 
 import com.example.listanddetails.data.mapper.toDomain
 import com.example.listanddetails.data.network.LaunchApiService
+import com.example.listanddetails.data.util.runCatchingCancellable
 import com.example.listanddetails.domain.model.LaunchDetail
 import com.example.listanddetails.domain.model.LaunchListResult
 import com.example.listanddetails.domain.repository.LaunchRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class LaunchRepositoryImpl(
-    private val apiService: LaunchApiService
+    private val apiService: LaunchApiService,
 ) : LaunchRepository {
 
     override suspend fun getListOfLaunches(
@@ -21,8 +23,7 @@ class LaunchRepositoryImpl(
         limit: Int,
         offset: Int
     ): Result<LaunchListResult> = withContext(Dispatchers.IO) {
-        runCatching {
-            // Выполняем сетевой запрос в фоне
+        runCatchingCancellable {
             val response = apiService.getListOfLaunches(
                 search = search,
                 ordering = ordering,
@@ -42,7 +43,7 @@ class LaunchRepositoryImpl(
     }
 
     override suspend fun getLaunchForId(id: String): Result<LaunchDetail> = withContext(Dispatchers.IO) {
-        runCatching {
+        runCatchingCancellable {
             val response = apiService.getDetailsLaunch(id = id)
             response.toDomain()
         }

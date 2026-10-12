@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,8 @@ import com.example.listanddetails.R
 import com.example.listanddetails.domain.model.AstronautItem
 import com.example.listanddetails.ui.astronauts.components.AstronautCard
 import com.example.listanddetails.ui.astronauts.components.AstronautDetailDialog
+import com.example.listanddetails.ui.components.AppErrorBanner
+import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.components.RocketLoadingIndicator
 import com.example.listanddetails.ui.components.SearchBarTopBar
 import org.koin.androidx.compose.koinViewModel
@@ -88,26 +89,12 @@ fun AstronautListContent(
             }
 
             state.error != null && state.items.isEmpty() -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = state.error,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(
-                        onClick = onRetry,
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text(stringResource(R.string.retry))
-                    }
-                }
+                AppErrorView(
+                    message = state.error,
+                    onRetry = onRetry,
+                    cooldownSeconds = state.cooldownSeconds,
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
 
             else -> {
@@ -131,6 +118,14 @@ fun AstronautListContent(
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
+                        if (state.error != null) {
+                            AppErrorBanner(
+                                message = state.error,
+                                onRetry = onRetry,
+                                cooldownSeconds = state.cooldownSeconds
+                            )
+                        }
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()

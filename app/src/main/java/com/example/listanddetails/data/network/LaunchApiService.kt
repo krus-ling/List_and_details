@@ -1,5 +1,6 @@
 package com.example.listanddetails.data.network
 
+import com.example.listanddetails.data.dto.AgencyDto
 import com.example.listanddetails.data.dto.AgencyListResponseDto
 import com.example.listanddetails.data.dto.AstronautListResponseDto
 import com.example.listanddetails.data.dto.LaunchDetailDto
