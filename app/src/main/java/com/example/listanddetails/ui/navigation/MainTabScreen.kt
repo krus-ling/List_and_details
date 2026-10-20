@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.Badge
@@ -28,6 +29,7 @@ import com.example.listanddetails.R
 import com.example.listanddetails.domain.cache.FilterBadgeCache
 import com.example.listanddetails.ui.agencies.AgencyListScreen
 import com.example.listanddetails.ui.astronauts.AstronautListScreen
+import com.example.listanddetails.ui.favorites.FavoritesScreen
 import com.example.listanddetails.ui.list.LaunchListScreen
 import org.koin.compose.koinInject
 
@@ -37,7 +39,8 @@ private enum class MainTabItem(
 ) {
     LAUNCHES(R.string.tab_launches, Icons.Default.RocketLaunch),
     AGENCIES(R.string.tab_agencies, Icons.Default.Business),
-    ASTRONAUTS(R.string.tab_astronauts, Icons.Default.Person)
+    ASTRONAUTS(R.string.tab_astronauts, Icons.Default.Person),
+    FAVORITES(R.string.tab_favorites, Icons.Default.FavoriteBorder)
 }
 
 @Composable
@@ -94,6 +97,7 @@ fun MainTabScreen(
                 0 -> LaunchListScreen(onLaunchClick = onLaunchClick)
                 1 -> AgencyListScreen()
                 2 -> AstronautListScreen()
+                3 -> FavoritesScreen(onLaunchClick = onLaunchClick)
             }
         }
     }

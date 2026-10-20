@@ -42,7 +42,9 @@ fun LaunchesLazyColumn(
     isLoading: Boolean,
     isNextPageLoading: Boolean,
     isFilterBadgeVisible: Boolean,
+    favoriteIds: Set<String> = emptySet(),
     onLaunchClick: (String) -> Unit,
+    onToggleFavorite: (LaunchItem) -> Unit,
     onLoadNextPage: () -> Unit,
     onOpenFilter: () -> Unit,
     modifier: Modifier = Modifier
@@ -111,6 +113,8 @@ fun LaunchesLazyColumn(
             ) { launch ->
                 LaunchCard(
                     launch = launch,
+                    isFavorite = favoriteIds.contains(launch.id),
+                    onToggleFavorite = { onToggleFavorite(launch) },
                     onClick = { onLaunchClick(launch.id) }
                 )
             }

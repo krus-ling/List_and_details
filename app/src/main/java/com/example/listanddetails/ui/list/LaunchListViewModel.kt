@@ -6,8 +6,11 @@ import com.example.listanddetails.data.mapper.toAppError
 import com.example.listanddetails.domain.cache.FilterBadgeCache
 import com.example.listanddetails.domain.model.AppError
 import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchItem
 import com.example.listanddetails.domain.repository.FilterPreferencesRepository
+import com.example.listanddetails.domain.usecase.GetFavoritesUseCase
 import com.example.listanddetails.domain.usecase.GetLaunchesUseCase
+import com.example.listanddetails.domain.usecase.ToggleFavoriteUseCase
 import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -23,11 +26,14 @@ private const val SEARCH_DEBOUNCE_MS = 500L
 class LaunchListViewModel(
     private val getLaunchesUseCase: GetLaunchesUseCase,
     private val filterRepository: FilterPreferencesRepository,
-    private val filterBadgeCache: FilterBadgeCache
+    private val filterBadgeCache: FilterBadgeCache,
+    private val getFavoritesUseCase: GetFavoritesUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
 
     init {
         observeSavedFilter()
+        observeFavorites()
     }
 
     private val _uiState = MutableStateFlow(LaunchListUiState())
@@ -49,6 +55,21 @@ class LaunchListViewModel(
                     _uiState.update { it.copy(filter = savedFilter) }
                     loadLaunches()
                 }
+        }
+    }
+
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            getFavoritesUseCase().collect { favorites ->
+                val favIds = favorites.map { it.id }.toSet()
+                _uiState.update { it.copy(favoriteIds = favIds) }
+            }
+        }
+    }
+
+    fun onToggleFavorite(launch: LaunchItem) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(launch)
         }
     }
 

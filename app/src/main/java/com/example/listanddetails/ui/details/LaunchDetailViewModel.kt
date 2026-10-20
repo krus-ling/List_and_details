@@ -4,11 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listanddetails.domain.repository.TextTranslator
 import com.example.listanddetails.domain.usecase.GetLaunchDetailUseCase
+import com.example.listanddetails.domain.usecase.ObserveIsFavoriteUseCase
+import com.example.listanddetails.domain.usecase.ToggleFavoriteUseCase
 import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,13 +21,29 @@ class LaunchDetailViewModel(
     private val getLaunchDetailUseCase: GetLaunchDetailUseCase,
     private val launchId: String,
     private val translationManager: TextTranslator,
+    private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LaunchDetailUiState())
     val uiState = _uiState.asStateFlow()
 
+    val isFavorite: StateFlow<Boolean> = observeIsFavoriteUseCase(launchId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
+
     init {
         loadLaunch()
+    }
+
+    fun onToggleFavorite() {
+        val detail = _uiState.value.launch ?: return
+        viewModelScope.launch {
+            toggleFavoriteUseCase(detail)
+        }
     }
 
     fun loadLaunch() {

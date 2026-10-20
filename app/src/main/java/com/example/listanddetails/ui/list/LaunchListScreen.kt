@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchItem
 import com.example.listanddetails.ui.components.AppErrorBanner
 import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
@@ -42,7 +43,8 @@ fun LaunchListScreen(
         onOpenFilter = viewModel::openFilterSheet,
         onDismissFilter = viewModel::closeFilterSheet,
         onFilterChanged = viewModel::onFilterChanged,
-        onResetFilter = viewModel::resetFilters
+        onResetFilter = viewModel::resetFilters,
+        onToggleFavorite = viewModel::onToggleFavorite
     )
 }
 
@@ -58,7 +60,8 @@ fun LaunchListContent(
     onOpenFilter: () -> Unit,
     onDismissFilter: () -> Unit,
     onFilterChanged: (LaunchFilter) -> Unit,
-    onResetFilter: () -> Unit
+    onResetFilter: () -> Unit,
+    onToggleFavorite: (LaunchItem) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -143,8 +146,10 @@ fun LaunchListContent(
                             filter = state.filter,
                             isLoading = state.isLoading,
                             isFilterBadgeVisible = isFilterBadgeVisible,
+                            favoriteIds = state.favoriteIds,
                             isNextPageLoading = state.isNextPageLoading,
                             onLaunchClick = onLaunchClick,
+                            onToggleFavorite = onToggleFavorite,
                             onLoadNextPage = onLoadNextPage,
                             onOpenFilter = onOpenFilter
                         )

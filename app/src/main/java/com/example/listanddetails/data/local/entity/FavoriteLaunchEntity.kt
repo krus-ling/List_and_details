@@ -8,12 +8,12 @@ data class FavoriteLaunchEntity(
     @PrimaryKey
     val id: String,
     val name: String,
-    val net: String,
-    val statusName: String,
-    val statusDescription: String?,
+    val status: String,
+    val date: String,
+    val agency: String,
     val imageUrl: String?,
-    val agencyName: String?,
-    val padName: String?,
-    val missionDescription: String?,
+    val padName: String? = null,
+    val hasVideo: Boolean = false,
+    val rawDate: String? = null,
     val addedAt: Long = System.currentTimeMillis()
 )

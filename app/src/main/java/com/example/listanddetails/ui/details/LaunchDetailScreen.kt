@@ -23,6 +23,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -75,12 +80,15 @@ fun LaunchDetailScreen(
     )
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
 
     LaunchDetailContent(
         state = state,
+        isFavorite = isFavorite,
         onBackClick = onBackClick,
         onRetry = viewModel::loadLaunch,
-        onTranslateClick = viewModel::toggleTranslation
+        onTranslateClick = viewModel::toggleTranslation,
+        onToggleFavorite = viewModel::onToggleFavorite
     )
 }
 
@@ -88,9 +96,11 @@ fun LaunchDetailScreen(
 @Composable
 fun LaunchDetailContent(
     state: LaunchDetailUiState,
+    isFavorite: Boolean,
     onBackClick: () -> Unit,
     onRetry: () -> Unit,
-    onTranslateClick: () -> Unit
+    onTranslateClick: () -> Unit,
+    onToggleFavorite: () -> Unit
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -105,9 +115,7 @@ fun LaunchDetailContent(
     ) {
         when {
             state.isLoading && state.launch == null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     IconButton(
                         onClick = onBackClick,
                         modifier = Modifier
@@ -239,22 +247,45 @@ fun LaunchDetailContent(
                         }
                     }
 
-                    IconButton(
-                        onClick = onBackClick,
+                    // Плавающие кнопки "Назад" и "В избранное" поверх шапки
+                    Row(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .statusBarsPadding()
-                            .padding(12.dp)
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.45f))
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = Color.White
-                        )
+                        IconButton(
+                            onClick = onBackClick,
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.45f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = Color.White
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onToggleFavorite,
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.45f))
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Filled.Favorite,
+                                contentDescription = "Избранное",
+                                tint = if (isFavorite) Color(0xFFE91E63) else Color.White
+                            )
+                        }
                     }
 
+                    // Схлопывающийся TopAppBar
                     AnimatedVisibility(
                         visible = isHeaderCollapsed,
                         enter = fadeIn(),
@@ -273,6 +304,15 @@ fun LaunchDetailContent(
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = stringResource(R.string.back)
+                                    )
+                                }
+                            },
+                            actions = {
+                                IconButton(onClick = onToggleFavorite) {
+                                    Icon(
+                                        imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Filled.Favorite,
+                                        contentDescription = "Избранное",
+                                        tint = if (isFavorite) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             },
@@ -304,9 +344,11 @@ private fun LaunchDetailContentPreview() {
     MaterialTheme {
         LaunchDetailContent(
             state = LaunchDetailUiState(launch = mockLaunchDetail),
+            isFavorite = true,
             onBackClick = {},
             onRetry = {},
-            onTranslateClick = {}
+            onTranslateClick = {},
+            onToggleFavorite = {}
         )
     }
 }
