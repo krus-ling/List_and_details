@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,10 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.listanddetails.R
+import com.example.listanddetails.domain.cache.FilterBadgeCache
 import com.example.listanddetails.ui.agencies.AgencyListScreen
 import com.example.listanddetails.ui.astronauts.AstronautListScreen
 import com.example.listanddetails.ui.list.LaunchListScreen
+import org.koin.compose.koinInject
 
 private enum class MainTabItem(
     val labelRes: Int,
@@ -37,9 +42,11 @@ private enum class MainTabItem(
 
 @Composable
 fun MainTabScreen(
-    onLaunchClick: (String) -> Unit
+    onLaunchClick: (String) -> Unit,
+    badgeCache: FilterBadgeCache = koinInject()
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val hasActiveFilters by badgeCache.hasActiveFilters.collectAsStateWithLifecycle()
 
     Scaffold(
         bottomBar = {
@@ -49,10 +56,25 @@ fun MainTabScreen(
                         selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
                         icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = stringResource(item.labelRes)
-                            )
+                            if (item == MainTabItem.LAUNCHES) {
+                                BadgedBox(
+                                    badge = {
+                                        if (hasActiveFilters) {
+                                            Badge()
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = stringResource(item.labelRes)
+                                    )
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = stringResource(item.labelRes)
+                                )
+                            }
                         },
                         label = {
                             Text(stringResource(item.labelRes))

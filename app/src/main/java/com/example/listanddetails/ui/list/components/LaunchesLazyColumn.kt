@@ -41,6 +41,7 @@ fun LaunchesLazyColumn(
     filter: LaunchFilter,
     isLoading: Boolean,
     isNextPageLoading: Boolean,
+    isFilterBadgeVisible: Boolean,
     onLaunchClick: (String) -> Unit,
     onLoadNextPage: () -> Unit,
     onOpenFilter: () -> Unit,
@@ -71,7 +72,7 @@ fun LaunchesLazyColumn(
             )
 
             TextButton(onClick = onOpenFilter) {
-                if (filter.isActive) {
+                if (isFilterBadgeVisible) {
                     Badge { Text(filter.activeCount.toString()) }
                     Spacer(modifier = Modifier.width(6.dp))
                 }

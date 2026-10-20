@@ -34,6 +34,7 @@ fun LaunchListScreen(
 
     LaunchListContent(
         state = state,
+        isFilterBadgeVisible = state.filter.isActive,
         onLaunchClick = onLaunchClick,
         onRetry = viewModel::loadLaunches,
         onSearchQueryChange = viewModel::onSearchQueryChanged,
@@ -49,6 +50,7 @@ fun LaunchListScreen(
 @Composable
 fun LaunchListContent(
     state: LaunchListUiState,
+    isFilterBadgeVisible: Boolean = false,
     onLaunchClick: (String) -> Unit,
     onRetry: () -> Unit,
     onSearchQueryChange: (String) -> Unit = {},
@@ -140,6 +142,7 @@ fun LaunchListContent(
                             totalCount = state.totalCount,
                             filter = state.filter,
                             isLoading = state.isLoading,
+                            isFilterBadgeVisible = isFilterBadgeVisible,
                             isNextPageLoading = state.isNextPageLoading,
                             onLaunchClick = onLaunchClick,
                             onLoadNextPage = onLoadNextPage,
@@ -180,7 +183,7 @@ private fun LaunchListSkeletonPreview() {
 private fun LaunchListPreview() {
     MaterialTheme {
         LaunchListContent(
-            state = LaunchListUiState(items = mockPreviewLaunches),
+            state = LaunchListUiState(isLoading = false, items = mockPreviewLaunches),
             onLaunchClick = {},
             onRetry = {},
             onOpenFilter = {},
@@ -197,6 +200,7 @@ private fun LaunchListWithActiveFiltersPreview() {
     MaterialTheme {
         LaunchListContent(
             state = LaunchListUiState(
+                isLoading = false,
                 items = mockPreviewLaunches.take(2),
                 filter = LaunchFilter(
                     agency = "SpaceX",
@@ -250,7 +254,7 @@ private fun LaunchListLoadingPreview() {
 private fun LaunchListErrorPreview() {
     MaterialTheme {
         LaunchListContent(
-            state = LaunchListUiState(error = "Сервер временно недоступен"),
+            state = LaunchListUiState(isLoading = false, error = "Сервер временно недоступен"),
             onLaunchClick = {},
             onRetry = {},
             onOpenFilter = {},

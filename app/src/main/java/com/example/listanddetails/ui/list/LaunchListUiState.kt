@@ -4,7 +4,7 @@ import com.example.listanddetails.domain.model.LaunchFilter
 import com.example.listanddetails.domain.model.LaunchItem
 
 data class LaunchListUiState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isNextPageLoading: Boolean = false,
     val items: List<LaunchItem> = emptyList(),
     val totalCount: Int = 0,
