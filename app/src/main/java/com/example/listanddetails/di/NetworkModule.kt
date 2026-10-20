@@ -1,5 +1,6 @@
 package com.example.listanddetails.di
 
+import com.example.listanddetails.data.network.ConnectivityInterceptor
 import com.example.listanddetails.data.network.LaunchApiService
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
@@ -35,9 +36,11 @@ val networkModule = module {
 
         OkHttpClient.Builder()
             .cache(cache)
+            .addInterceptor(ConnectivityInterceptor(context))
             .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .build()
     }
 
@@ -48,9 +51,9 @@ val networkModule = module {
         val contentType = "application/json".toMediaType()
 
         Retrofit.Builder()
-//            .baseUrl("https://lldev.thespacedevs.com/")
+            .baseUrl("https://lldev.thespacedevs.com/")
             // можно выбрать `lldev` для разработки, не будет ограничений, но данных меньше
-            .baseUrl("https://ll.thespacedevs.com/")
+//            .baseUrl("https://ll.thespacedevs.com/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

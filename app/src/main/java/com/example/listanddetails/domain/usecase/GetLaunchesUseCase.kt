@@ -67,8 +67,8 @@ class GetLaunchesUseCase(
 
     private fun buildSearchQuery(filter: LaunchFilter, freeTextSearchQuery: String?): String? {
         val freeText = freeTextSearchQuery?.takeIf { it.isNotBlank() }
-        return listOfNotNull(filter.agency, filter.pad, freeText)
-            .joinToString(" ")
-            .takeIf { it.isNotBlank() }
+        if (freeText != null) return freeText
+        return listOfNotNull(filter.agency, filter.pad)
+            .firstOrNull { it.isNotBlank() }
     }
 }
