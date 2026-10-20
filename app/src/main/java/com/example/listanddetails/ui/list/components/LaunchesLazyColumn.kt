@@ -1,5 +1,6 @@
 package com.example.listanddetails.ui.list.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +48,7 @@ fun LaunchesLazyColumn(
     onToggleFavorite: (LaunchItem) -> Unit,
     onLoadNextPage: () -> Unit,
     onOpenFilter: () -> Unit,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     val listAlpha by animateFloatAsState(
         targetValue = if (isLoading && items.isNotEmpty()) 0.5f else 1.0f,

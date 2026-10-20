@@ -10,8 +10,10 @@ val databaseModule = module {
         Room.databaseBuilder(
             androidContext(),
             AppDatabase::class.java,
-            "launches_database.db"
-        ).build()
+            "launches_database.db",
+        )
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
     }
 
     single { get<AppDatabase>().favoriteLaunchDao() }

@@ -8,6 +8,7 @@ interface FavoriteLaunchRepository {
     fun observeFavorites(): Flow<List<LaunchItem>>
     fun observeIsFavorite(id: String): Flow<Boolean>
     suspend fun isFavorite(id: String): Boolean
+    suspend fun getFavoriteDetail(id: String): LaunchDetail?
     suspend fun toggleFavorite(launch: LaunchItem)
     suspend fun toggleFavorite(detail: LaunchDetail)
     suspend fun removeFavorite(id: String)

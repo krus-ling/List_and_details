@@ -7,7 +7,6 @@ import androidx.room.Query
 import com.example.listanddetails.data.local.entity.FavoriteLaunchEntity
 import kotlinx.coroutines.flow.Flow
 
-
 @Dao
 interface FavoriteLaunchDao {
     @Query("SELECT * FROM favorite_launches ORDER BY addedAt DESC")
@@ -18,6 +17,9 @@ interface FavoriteLaunchDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorite_launches WHERE id = :id)")
     suspend fun isFavorite(id: String): Boolean
+
+    @Query("SELECT * FROM favorite_launches WHERE id = :id")
+    suspend fun getFavoriteById(id: String): FavoriteLaunchEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(launch: FavoriteLaunchEntity)

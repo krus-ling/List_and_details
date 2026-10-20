@@ -15,5 +15,14 @@ data class FavoriteLaunchEntity(
     val padName: String? = null,
     val hasVideo: Boolean = false,
     val rawDate: String? = null,
-    val addedAt: Long = System.currentTimeMillis()
+    val addedAt: Long = System.currentTimeMillis(),
+    val rocketName: String? = null,
+    val rocketImage: String? = null,
+    val missionName: String? = null,
+    val missionDescription: String? = null,
+    val location: String? = null,
+    val orbit: String? = null,
+    val missionType: String? = null,
+    val failReason: String? = null,
+    val videoUrl: String? = null,
 )

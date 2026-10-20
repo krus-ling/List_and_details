@@ -7,8 +7,8 @@ import com.example.listanddetails.data.local.entity.FavoriteLaunchEntity
 
 @Database(
     entities = [FavoriteLaunchEntity::class],
-    version = 1,
-    exportSchema = false
+    version = 2,
+    exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteLaunchDao(): FavoriteLaunchDao

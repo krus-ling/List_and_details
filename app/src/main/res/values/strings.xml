@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">List and details</string>
     <string name="app_title">Космические запуски</string>
-    <string name="search_placeholder">Поиск...</string>
+    <string name="search_placeholder">Поиск…</string>
     <string name="filters_title">Фильтры</string>
     <string name="filters_setup">Настройка фильтров</string>
     <string name="launches_found">Найдено запусков: %1$d</string>

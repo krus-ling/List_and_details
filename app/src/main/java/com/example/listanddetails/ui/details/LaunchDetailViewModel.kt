@@ -21,7 +21,7 @@ class LaunchDetailViewModel(
     private val getLaunchDetailUseCase: GetLaunchDetailUseCase,
     private val launchId: String,
     private val translationManager: TextTranslator,
-    private val observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
+    observeIsFavoriteUseCase: ObserveIsFavoriteUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : ViewModel() {
 

@@ -18,6 +18,28 @@ fun FavoriteLaunchEntity.toDomain(): LaunchItem {
     )
 }
 
+fun FavoriteLaunchEntity.toDetail(): LaunchDetail {
+    return LaunchDetail(
+        id = id,
+        name = name,
+        status = status,
+        date = date,
+        agency = agency,
+        imageUrl = imageUrl,
+        rocketName = rocketName ?: name,
+        rocketImage = rocketImage ?: imageUrl,
+        missionName = missionName ?: name,
+        missionDescription = missionDescription,
+        padName = padName,
+        location = location,
+        orbit = orbit,
+        missionType = missionType,
+        failReason = failReason,
+        videoUrl = videoUrl,
+        rawDate = rawDate
+    )
+}
+
 fun LaunchItem.toFavoriteEntity(): FavoriteLaunchEntity {
     return FavoriteLaunchEntity(
         id = id,
@@ -41,7 +63,16 @@ fun LaunchDetail.toFavoriteEntity(): FavoriteLaunchEntity {
         agency = agency,
         imageUrl = imageUrl,
         padName = padName,
-        hasVideo = videoUrl != null,
-        rawDate = null
+        hasVideo = !videoUrl.isNullOrBlank(),
+        rawDate = rawDate,
+        rocketName = rocketName,
+        rocketImage = rocketImage,
+        missionName = missionName,
+        missionDescription = missionDescription,
+        location = location,
+        orbit = orbit,
+        missionType = missionType,
+        failReason = failReason,
+        videoUrl = videoUrl
     )
 }

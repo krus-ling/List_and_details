@@ -1,6 +1,7 @@
 package com.example.listanddetails.data.repository
 
 import com.example.listanddetails.data.local.dao.FavoriteLaunchDao
+import com.example.listanddetails.data.mapper.toDetail
 import com.example.listanddetails.data.mapper.toDomain
 import com.example.listanddetails.data.mapper.toFavoriteEntity
 import com.example.listanddetails.domain.model.LaunchDetail
@@ -27,6 +28,10 @@ class FavoriteLaunchRepositoryImpl(
 
     override suspend fun isFavorite(id: String): Boolean = withContext(Dispatchers.IO) {
         favoriteDao.isFavorite(id)
+    }
+
+    override suspend fun getFavoriteDetail(id: String): LaunchDetail? = withContext(Dispatchers.IO) {
+        favoriteDao.getFavoriteById(id)?.toDetail()
     }
 
     override suspend fun toggleFavorite(launch: LaunchItem) = withContext(Dispatchers.IO) {
