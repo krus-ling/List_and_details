@@ -12,15 +12,25 @@ import org.koin.dsl.module
 
 val repositoryModule = module {
     single<LaunchRepository> {
-        LaunchRepositoryImpl(apiService = get())
+        LaunchRepositoryImpl(
+            apiService = get(),
+            cache = get(),
+            favoriteLaunchDao = get()
+        )
     }
 
     single<AgencyRepository> {
-        AgencyRepositoryImpl(apiService = get())
+        AgencyRepositoryImpl(
+            apiService = get(),
+            cache = get()
+        )
     }
 
     single<AstronautRepository> {
-        AstronautRepositoryImpl(apiService = get())
+        AstronautRepositoryImpl(
+            apiService = get(),
+            cache = get()
+        )
     }
 
     single<FavoriteLaunchRepository> {
