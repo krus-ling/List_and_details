@@ -3,7 +3,7 @@ package com.example.listanddetails.ui.astronauts
 import com.example.listanddetails.domain.model.AstronautItem
 
 data class AstronautListUiState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isNextPageLoading: Boolean = false,
     val items: List<AstronautItem> = emptyList(),
     val totalCount: Int = 0,

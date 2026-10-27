@@ -1,7 +1,10 @@
 package com.example.listanddetails
 
 import android.app.Application
+import com.example.listanddetails.di.cacheModule
+import com.example.listanddetails.di.databaseModule
 import com.example.listanddetails.di.networkModule
+import com.example.listanddetails.di.preferencesModule
 import com.example.listanddetails.di.presentationModule
 import com.example.listanddetails.di.repositoryModule
 import com.example.listanddetails.di.translationModule
@@ -23,7 +26,10 @@ class App : Application() {
                 repositoryModule,
                 useCaseModule,
                 presentationModule,
-                translationModule
+                translationModule,
+                cacheModule,
+                preferencesModule,
+                databaseModule
             )
         }
     }

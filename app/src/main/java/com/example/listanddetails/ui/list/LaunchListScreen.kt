@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchItem
 import com.example.listanddetails.ui.components.AppErrorBanner
 import com.example.listanddetails.ui.components.AppErrorView
 import com.example.listanddetails.ui.list.components.ActiveFilterChipsRow
@@ -34,6 +35,7 @@ fun LaunchListScreen(
 
     LaunchListContent(
         state = state,
+        isFilterBadgeVisible = state.filter.isActive,
         onLaunchClick = onLaunchClick,
         onRetry = viewModel::loadLaunches,
         onSearchQueryChange = viewModel::onSearchQueryChanged,
@@ -41,7 +43,8 @@ fun LaunchListScreen(
         onOpenFilter = viewModel::openFilterSheet,
         onDismissFilter = viewModel::closeFilterSheet,
         onFilterChanged = viewModel::onFilterChanged,
-        onResetFilter = viewModel::resetFilters
+        onResetFilter = viewModel::resetFilters,
+        onToggleFavorite = viewModel::onToggleFavorite
     )
 }
 
@@ -49,6 +52,7 @@ fun LaunchListScreen(
 @Composable
 fun LaunchListContent(
     state: LaunchListUiState,
+    isFilterBadgeVisible: Boolean = false,
     onLaunchClick: (String) -> Unit,
     onRetry: () -> Unit,
     onSearchQueryChange: (String) -> Unit = {},
@@ -56,7 +60,8 @@ fun LaunchListContent(
     onOpenFilter: () -> Unit,
     onDismissFilter: () -> Unit,
     onFilterChanged: (LaunchFilter) -> Unit,
-    onResetFilter: () -> Unit
+    onResetFilter: () -> Unit,
+    onToggleFavorite: (LaunchItem) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -140,8 +145,11 @@ fun LaunchListContent(
                             totalCount = state.totalCount,
                             filter = state.filter,
                             isLoading = state.isLoading,
+                            isFilterBadgeVisible = isFilterBadgeVisible,
+                            favoriteIds = state.favoriteIds,
                             isNextPageLoading = state.isNextPageLoading,
                             onLaunchClick = onLaunchClick,
+                            onToggleFavorite = onToggleFavorite,
                             onLoadNextPage = onLoadNextPage,
                             onOpenFilter = onOpenFilter
                         )
@@ -180,7 +188,7 @@ private fun LaunchListSkeletonPreview() {
 private fun LaunchListPreview() {
     MaterialTheme {
         LaunchListContent(
-            state = LaunchListUiState(items = mockPreviewLaunches),
+            state = LaunchListUiState(isLoading = false, items = mockPreviewLaunches),
             onLaunchClick = {},
             onRetry = {},
             onOpenFilter = {},
@@ -197,6 +205,7 @@ private fun LaunchListWithActiveFiltersPreview() {
     MaterialTheme {
         LaunchListContent(
             state = LaunchListUiState(
+                isLoading = false,
                 items = mockPreviewLaunches.take(2),
                 filter = LaunchFilter(
                     agency = "SpaceX",
@@ -250,7 +259,7 @@ private fun LaunchListLoadingPreview() {
 private fun LaunchListErrorPreview() {
     MaterialTheme {
         LaunchListContent(
-            state = LaunchListUiState(error = "Сервер временно недоступен"),
+            state = LaunchListUiState(isLoading = false, error = "Сервер временно недоступен"),
             onLaunchClick = {},
             onRetry = {},
             onOpenFilter = {},

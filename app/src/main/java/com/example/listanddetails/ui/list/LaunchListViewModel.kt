@@ -3,14 +3,20 @@ package com.example.listanddetails.ui.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listanddetails.data.mapper.toAppError
+import com.example.listanddetails.domain.cache.FilterBadgeCache
 import com.example.listanddetails.domain.model.AppError
 import com.example.listanddetails.domain.model.LaunchFilter
+import com.example.listanddetails.domain.model.LaunchItem
+import com.example.listanddetails.domain.repository.FilterPreferencesRepository
+import com.example.listanddetails.domain.usecase.GetFavoritesUseCase
 import com.example.listanddetails.domain.usecase.GetLaunchesUseCase
+import com.example.listanddetails.domain.usecase.ToggleFavoriteUseCase
 import com.example.listanddetails.ui.components.handleAppError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -18,8 +24,17 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val SEARCH_DEBOUNCE_MS = 500L
 
 class LaunchListViewModel(
-    private val getLaunchesUseCase: GetLaunchesUseCase
+    private val getLaunchesUseCase: GetLaunchesUseCase,
+    private val filterRepository: FilterPreferencesRepository,
+    private val filterBadgeCache: FilterBadgeCache,
+    private val getFavoritesUseCase: GetFavoritesUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
+
+    init {
+        observeSavedFilter()
+        observeFavorites()
+    }
 
     private val _uiState = MutableStateFlow(LaunchListUiState())
     val uiState = _uiState.asStateFlow()
@@ -28,8 +43,47 @@ class LaunchListViewModel(
     private var searchJob: Job? = null
     private var serverOffset = 0
 
-    init {
-        loadLaunches()
+    private fun observeSavedFilter() {
+        viewModelScope.launch {
+            filterRepository.getFilter()
+                .distinctUntilChanged()
+                .collect { savedFilter ->
+                    // Обновляем in-memory кэш бейджа (Задача 3)
+                    filterBadgeCache.updateBadge(savedFilter.isActive)
+
+                    // Обновляем стейт и загружаем данные
+                    _uiState.update { it.copy(filter = savedFilter) }
+                    loadLaunches()
+                }
+        }
+    }
+
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            getFavoritesUseCase().collect { favorites ->
+                val favIds = favorites.map { it.id }.toSet()
+                _uiState.update { it.copy(favoriteIds = favIds) }
+            }
+        }
+    }
+
+    fun onToggleFavorite(launch: LaunchItem) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(launch)
+        }
+    }
+
+    fun onFilterChanged(newFilter: LaunchFilter) {
+        viewModelScope.launch {
+            // Сохраняем в DataStore
+            filterRepository.saveFilter(newFilter)
+        }
+    }
+
+    fun resetFilters() {
+        viewModelScope.launch {
+            filterRepository.clearFilter()
+        }
     }
 
     fun loadLaunches() {
@@ -108,15 +162,6 @@ class LaunchListViewModel(
                 handleError(throwable)
             }
         }
-    }
-
-    fun onFilterChanged(newFilter: LaunchFilter) {
-        _uiState.update { it.copy(filter = newFilter) }
-        loadLaunches()
-    }
-
-    fun resetFilters() {
-        onFilterChanged(LaunchFilter())
     }
 
     fun openFilterSheet() {

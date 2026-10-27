@@ -1,5 +1,6 @@
 package com.example.listanddetails.ui.list.components
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,10 +42,13 @@ fun LaunchesLazyColumn(
     filter: LaunchFilter,
     isLoading: Boolean,
     isNextPageLoading: Boolean,
+    isFilterBadgeVisible: Boolean,
+    favoriteIds: Set<String> = emptySet(),
     onLaunchClick: (String) -> Unit,
+    onToggleFavorite: (LaunchItem) -> Unit,
     onLoadNextPage: () -> Unit,
     onOpenFilter: () -> Unit,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     val listAlpha by animateFloatAsState(
         targetValue = if (isLoading && items.isNotEmpty()) 0.5f else 1.0f,
@@ -71,7 +75,7 @@ fun LaunchesLazyColumn(
             )
 
             TextButton(onClick = onOpenFilter) {
-                if (filter.isActive) {
+                if (isFilterBadgeVisible) {
                     Badge { Text(filter.activeCount.toString()) }
                     Spacer(modifier = Modifier.width(6.dp))
                 }
@@ -110,6 +114,8 @@ fun LaunchesLazyColumn(
             ) { launch ->
                 LaunchCard(
                     launch = launch,
+                    isFavorite = favoriteIds.contains(launch.id),
+                    onToggleFavorite = { onToggleFavorite(launch) },
                     onClick = { onLaunchClick(launch.id) }
                 )
             }
