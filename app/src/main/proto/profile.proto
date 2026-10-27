@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "com.example.listanddetails.data.model";
+option java_multiple_files = true;
+
+message ProfileDto {
+  string name = 1;
+  string position = 2;
+  string photo_uri = 3;
+  string resume_url = 4;
+}
