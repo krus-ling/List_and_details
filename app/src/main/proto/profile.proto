@@ -8,4 +8,5 @@ message ProfileDto {
   string position = 2;
   string photo_uri = 3;
   string resume_url = 4;
+  string favorite_lesson_time = 5;
 }

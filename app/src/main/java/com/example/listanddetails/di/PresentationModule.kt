@@ -1,5 +1,6 @@
 package com.example.listanddetails.di
 
+import com.example.listanddetails.data.notification.LessonAlarmScheduler
 import com.example.listanddetails.data.util.ImageStorageManager
 import com.example.listanddetails.data.util.ResumeFileDownloader
 import com.example.listanddetails.ui.agencies.AgencyListViewModel
@@ -17,6 +18,7 @@ import org.koin.dsl.module
 val presentationModule = module {
     single { ImageStorageManager(androidContext()) }
     single { ResumeFileDownloader(androidContext()) }
+    single { LessonAlarmScheduler(androidContext()) }
 
     viewModelOf(::LaunchListViewModel)
     viewModelOf(::AgencyListViewModel)

@@ -8,7 +8,8 @@ fun ProfileDto.toDomain(): Profile {
         name = name,
         position = position,
         photoUri = photoUri,
-        resumeUrl = resumeUrl
+        resumeUrl = resumeUrl,
+        favoriteLessonTime = favoriteLessonTime
     )
 }
 
@@ -18,5 +19,6 @@ fun Profile.toDto(): ProfileDto {
         .setPosition(position)
         .setPhotoUri(photoUri)
         .setResumeUrl(resumeUrl)
+        .setFavoriteLessonTime(favoriteLessonTime)
         .build()
 }
