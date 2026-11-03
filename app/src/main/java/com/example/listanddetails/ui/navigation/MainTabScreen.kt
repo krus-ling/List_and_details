@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
@@ -31,6 +32,7 @@ import com.example.listanddetails.ui.agencies.AgencyListScreen
 import com.example.listanddetails.ui.astronauts.AstronautListScreen
 import com.example.listanddetails.ui.favorites.FavoritesScreen
 import com.example.listanddetails.ui.list.LaunchListScreen
+import com.example.listanddetails.ui.profile.ProfileScreen
 import org.koin.compose.koinInject
 
 private enum class MainTabItem(
@@ -40,12 +42,14 @@ private enum class MainTabItem(
     LAUNCHES(R.string.tab_launches, Icons.Default.RocketLaunch),
     AGENCIES(R.string.tab_agencies, Icons.Default.Business),
     ASTRONAUTS(R.string.tab_astronauts, Icons.Default.Person),
-    FAVORITES(R.string.tab_favorites, Icons.Default.FavoriteBorder)
+    FAVORITES(R.string.tab_favorites, Icons.Default.FavoriteBorder),
+    PROFILE(R.string.tab_profile, Icons.Default.AccountCircle)
 }
 
 @Composable
 fun MainTabScreen(
     onLaunchClick: (String) -> Unit,
+    onEditProfileClick: () -> Unit,
     badgeCache: FilterBadgeCache = koinInject()
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -98,6 +102,7 @@ fun MainTabScreen(
                 1 -> AgencyListScreen()
                 2 -> AstronautListScreen()
                 3 -> FavoritesScreen(onLaunchClick = onLaunchClick)
+                4 -> ProfileScreen(onEditClick = onEditProfileClick)
             }
         }
     }

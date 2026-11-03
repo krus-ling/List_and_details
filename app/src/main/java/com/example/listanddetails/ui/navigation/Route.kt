@@ -12,4 +12,7 @@ sealed interface Route {
 
     @Serializable
     data class LaunchDetails(val id: String) : Route
+
+    @Serializable
+    data object EditProfile : Route
 }
