@@ -27,11 +27,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -48,7 +50,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,6 +75,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.listanddetails.R
 import org.koin.androidx.compose.koinViewModel
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,6 +87,7 @@ fun EditProfileScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPhotoDialog by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
@@ -92,6 +99,7 @@ fun EditProfileScreen(
         }
     }
 
+    // Разрешение на медиа/галерею
     val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_IMAGES
     } else {
@@ -116,6 +124,32 @@ fun EditProfileScreen(
 
             if (!isGranted) {
                 storagePermissionLauncher.launch(permissionToRequest)
+            }
+        }
+    }
+
+    // Запрос разрешения на отправку уведомлений для Android 13+ (POST_NOTIFICATIONS)
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Toast.makeText(
+                context,
+                R.string.notification_permission_required,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasNotificationPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!hasNotificationPermission) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
     }
@@ -247,6 +281,7 @@ fun EditProfileScreen(
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    // ФИО
                     OutlinedTextField(
                         value = uiState.name,
                         onValueChange = viewModel::onNameChange,
@@ -267,6 +302,7 @@ fun EditProfileScreen(
                         )
                     )
 
+                    // Должность
                     OutlinedTextField(
                         value = uiState.position,
                         onValueChange = viewModel::onPositionChange,
@@ -287,6 +323,7 @@ fun EditProfileScreen(
                         )
                     )
 
+                    // Ссылка на резюме
                     OutlinedTextField(
                         value = uiState.resumeUrl,
                         onValueChange = viewModel::onResumeUrlChange,
@@ -306,20 +343,79 @@ fun EditProfileScreen(
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
+
+                    // Время любимой пары (с возможностью ввода вручную и выбора через часы)
+                    OutlinedTextField(
+                        value = uiState.favoriteLessonTime,
+                        onValueChange = viewModel::onFavoriteLessonTimeChange,
+                        label = { Text(stringResource(R.string.favorite_lesson_time)) },
+                        placeholder = { Text(stringResource(R.string.favorite_lesson_time_hint)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = if (uiState.favoriteLessonTimeError != null) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                }
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { showTimePickerDialog = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.AccessTime,
+                                    contentDescription = stringResource(R.string.select_time),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        },
+                        isError = uiState.favoriteLessonTimeError != null,
+                        supportingText = {
+                            if (uiState.favoriteLessonTimeError != null) {
+                                Text(
+                                    text = uiState.favoriteLessonTimeError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Done Save Button
+            // Done Save Button (активна только если поле времени заполнено и валидно)
             Button(
-                onClick = viewModel::saveProfile,
+                onClick = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val hasNotificationPermission = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (!hasNotificationPermission) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                    viewModel.saveProfile()
+                },
+                enabled = uiState.isSaveEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
                 Icon(
@@ -339,6 +435,7 @@ fun EditProfileScreen(
         }
     }
 
+    // Диалог выбора источника фото (Камера / Галерея)
     if (showPhotoDialog) {
         AlertDialog(
             onDismissRequest = { showPhotoDialog = false },
@@ -427,6 +524,69 @@ fun EditProfileScreen(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showPhotoDialog = false }) {
+                    Text(text = stringResource(R.string.close))
+                }
+            }
+        )
+    }
+
+    // Material 3 TimePicker Dialog (виджет часов)
+    if (showTimePickerDialog) {
+        val initialHourMinute = remember(uiState.favoriteLessonTime) {
+            val parts = uiState.favoriteLessonTime.split(":")
+            if (parts.size == 2 && parts[0].toIntOrNull() != null && parts[1].toIntOrNull() != null) {
+                parts[0].toInt() to parts[1].toInt()
+            } else {
+                val now = Calendar.getInstance()
+                now.get(Calendar.HOUR_OF_DAY) to now.get(Calendar.MINUTE)
+            }
+        }
+
+        val timePickerState = rememberTimePickerState(
+            initialHour = initialHourMinute.first,
+            initialMinute = initialHourMinute.second,
+            is24Hour = true
+        )
+
+        AlertDialog(
+            onDismissRequest = { showTimePickerDialog = false },
+            shape = RoundedCornerShape(28.dp),
+            title = {
+                Text(
+                    text = stringResource(R.string.select_time_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TimePicker(state = timePickerState)
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val formattedTime = String.format(
+                            Locale.getDefault(),
+                            "%02d:%02d",
+                            timePickerState.hour,
+                            timePickerState.minute
+                        )
+                        viewModel.onFavoriteLessonTimeChange(formattedTime)
+                        showTimePickerDialog = false
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.apply),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePickerDialog = false }) {
                     Text(text = stringResource(R.string.close))
                 }
             }

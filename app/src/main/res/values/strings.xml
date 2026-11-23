@@ -93,4 +93,21 @@
     <string name="open_resume_chooser">Открыть резюме с помощью</string>
     <string name="no_pdf_app_found">Не найдено приложение для чтения PDF</string>
     <string name="permission_denied_message">Для загрузки и сохранения файлов требуется доступ к хранилищу</string>
+
+    <!-- Practice 7: Favorite Lesson Time & Notifications -->
+    <string name="favorite_lesson_time">Время любимой пары</string>
+    <string name="favorite_lesson_time_hint">ЧЧ:ММ</string>
+    <string name="favorite_lesson_time_empty_error">Поле обязательно для заполнения</string>
+    <string name="favorite_lesson_time_format_error">Неверный формат времени (ожидается ЧЧ:ММ, например 14:30)</string>
+    <string name="select_time">Выбрать время</string>
+    <string name="select_time_title">Выберите время пары</string>
+    <string name="lesson_notification_channel_name">Напоминания о парах</string>
+    <string name="lesson_notification_channel_desc">Уведомления о начале любимой пары</string>
+    <string name="lesson_notification_title">Время любимой пары!</string>
+    <string name="lesson_notification_text_with_name">%1$s, пора на любимую пару! Начало в %2$s.</string>
+    <string name="lesson_notification_text">Пора на любимую пару! Начало в %1$s.</string>
+    <string name="lesson_reminder_scheduled_today">Напоминание установлено на сегодня в %1$s</string>
+    <string name="lesson_reminder_scheduled_tomorrow">Напоминание установлено на завтра в %1$s</string>
+    <string name="notification_permission_required">Для получения уведомлений о паре разрешите отправку уведомлений</string>
+    <string name="profile_lesson_time_title">Любимая пара</string>
 </resources>
