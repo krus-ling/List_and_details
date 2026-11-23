@@ -1,6 +1,7 @@
 package com.example.listanddetails
 
 import android.app.Application
+import com.example.listanddetails.data.di.profileDataModule
 import com.example.listanddetails.di.cacheModule
 import com.example.listanddetails.di.databaseModule
 import com.example.listanddetails.di.networkModule
@@ -9,6 +10,8 @@ import com.example.listanddetails.di.presentationModule
 import com.example.listanddetails.di.repositoryModule
 import com.example.listanddetails.di.translationModule
 import com.example.listanddetails.di.useCaseModule
+import com.example.listanddetails.domain.di.profileDomainModule
+import com.example.listanddetails.ui.profile.di.profileFeatureModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -29,7 +32,10 @@ class App : Application() {
                 translationModule,
                 cacheModule,
                 preferencesModule,
-                databaseModule
+                databaseModule,
+                profileDomainModule,
+                profileDataModule,
+                profileFeatureModule
             )
         }
     }

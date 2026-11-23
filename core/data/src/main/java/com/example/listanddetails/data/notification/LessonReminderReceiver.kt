@@ -11,8 +11,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.example.listanddetails.MainActivity
-import com.example.listanddetails.R
+import com.example.listanddetails.core.data.R
 
 class LessonReminderReceiver : BroadcastReceiver() {
 
@@ -36,8 +35,12 @@ class LessonReminderReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // По нажатию на push-уведомление открывается наше приложение
-        val openAppIntent = Intent(context, MainActivity::class.java).apply {
+        // По нажатию на push-уведомление открывается приложение
+        val openAppIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        } ?: Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            setPackage(context.packageName)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 

@@ -24,3 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "List and details"
 include(":app")
+include(":feature:profile")
+include(":core:domain")
+include(":core:data")

@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.example.listanddetails.R
+import com.example.listanddetails.feature.profile.R
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,7 +231,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Favorite Lesson Time Card (Практика 7)
+            // Favorite Lesson Time Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -73,7 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.example.listanddetails.R
+import com.example.listanddetails.feature.profile.R
 import org.koin.androidx.compose.koinViewModel
 import java.util.Calendar
 import java.util.Locale

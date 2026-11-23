@@ -14,9 +14,7 @@ class ProfileRepositoryImpl(
 ) : ProfileRepository {
 
     override fun getProfile(): Flow<Profile> {
-        return dataStore.data.map { dto ->
-            dto.toDomain()
-        }
+        return dataStore.data.map { it.toDomain() }
     }
 
     override suspend fun saveProfile(profile: Profile) {

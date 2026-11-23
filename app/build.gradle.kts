@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -31,20 +30,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    sourceSets {
-        getByName("main") {
-            java.srcDirs(
-                file("build/generated/source/proto/debug/java"),
-                file("build/generated/source/proto/debug/kotlin")
-            )
-        }
-    }
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
+    implementation(project(":feature:profile"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -77,32 +72,10 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
-    implementation(libs.androidx.datastore)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.protobuf.javalite)
-    implementation(libs.protobuf.kotlin.lite)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-}
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:4.29.3"
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {
-                    option("lite")
-                }
-                create("kotlin") {
-                    option("lite")
-                }
-            }
-        }
-    }
 }
