@@ -10,9 +10,9 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.listanddetails.R
-import java.io.File
 import androidx.core.net.toUri
+import com.example.listanddetails.core.data.R
+import java.io.File
 
 class ResumeFileDownloader(private val context: Context) {
 

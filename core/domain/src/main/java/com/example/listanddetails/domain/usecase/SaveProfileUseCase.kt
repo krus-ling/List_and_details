@@ -4,7 +4,9 @@ import com.example.listanddetails.domain.model.Profile
 import com.example.listanddetails.domain.repository.ProfileRepository
 
 class SaveProfileUseCase(
-    private val repository: ProfileRepository
+    private val profileRepository: ProfileRepository
 ) {
-    suspend operator fun invoke(profile: Profile) = repository.saveProfile(profile)
+    suspend operator fun invoke(profile: Profile) {
+        profileRepository.saveProfile(profile)
+    }
 }

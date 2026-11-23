@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_profile">Профиль</string>
+    <string name="profile_title">Профиль пользователя</string>
+    <string name="edit_profile_title">Редактирование профиля</string>
+    <string name="full_name">ФИО</string>
+    <string name="position">Должность</string>
+    <string name="resume_url">Ссылка на резюме</string>
+    <string name="resume_button">Открыть резюме</string>
+    <string name="done">Готово</string>
+    <string name="select_photo_title">Выберите источник фото</string>
+    <string name="camera">Сделать фото (Камера)</string>
+    <string name="gallery">Выбрать из галереи</string>
+    <string name="back">Назад</string>
+    <string name="close">Закрыть</string>
+    <string name="apply">Применить</string>
+    <string name="not_specified">Не указана</string>
+    <string name="permission_denied_message">Для загрузки и сохранения файлов требуется доступ к хранилищу</string>
+    <string name="favorite_lesson_time">Время любимой пары</string>
+    <string name="favorite_lesson_time_hint">ЧЧ:ММ</string>
+    <string name="favorite_lesson_time_empty_error">Поле обязательно для заполнения</string>
+    <string name="favorite_lesson_time_format_error">Неверный формат времени (ожидается ЧЧ:ММ, например 14:30)</string>
+    <string name="select_time">Выбрать время</string>
+    <string name="select_time_title">Выберите время пары</string>
+    <string name="notification_permission_required">Для получения уведомлений о паре разрешите отправку уведомлений</string>
+    <string name="profile_lesson_time_title">Любимая пара</string>
+</resources>
